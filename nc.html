@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NC พนักงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#fff;--fg:#111827;--mute:#6B7280;--line:#E5E7EB;--soft:#F9FAFB;--acc:#1D4ED8;--warn:#B45309;--bad:#B91C1C;--ok:#047857}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans Thai',Tahoma,sans-serif;font-size:14px}
+header{padding:16px 20px 0}
+h1{font-size:19px;margin:0 0 2px;font-weight:700}
+.sub{color:var(--mute);font-size:12.5px}
+main{padding:14px 20px 36px;max-width:1500px}
+.emb header{display:none}.emb main{padding-top:6px}
+svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}.bar .sp{flex:1}
+select,input[type=text],input[type=password],input[type=search]{font:inherit;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;color:var(--fg)}
+button.b{font:inherit;border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;color:var(--fg);display:inline-flex;gap:6px;align-items:center}
+button.b:hover{border-color:#9CA3AF}button.b.pri{background:var(--acc);border-color:var(--acc);color:#fff}button.b:disabled{opacity:.45;cursor:not-allowed}
+.sec{display:flex;align-items:baseline;gap:12px;margin:18px 0 8px}.sec h2{margin:0;font-size:16px}.sec span{color:var(--mute);font-size:13px}
+.wrap{max-height:52vh}
+.grp{display:flex;gap:10px;margin:0 0 14px;flex-wrap:wrap}.grp button{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:230px}.grp button span{color:var(--mute);font-size:12.5px}.grp button.on{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{font:inherit;border:0;background:#fff;padding:6px 12px;cursor:pointer;color:var(--mute)}.seg button.on{background:var(--fg);color:#fff}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+.card.k{cursor:pointer}.card.k:hover{border-color:#9CA3AF}.card.k.on{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+.card .l{color:var(--mute);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.card .v{font-size:34px;font-weight:600;letter-spacing:-1px;line-height:1.15;margin-top:4px}.card .v small{font-size:14px;color:var(--mute);font-weight:400;letter-spacing:0}
+.card .f{font-size:12.5px;color:var(--mute);margin-top:4px;line-height:1.5}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%}
+.flow{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:12px;margin:-4px 0 12px}
+.alert{border:1px solid #F3C98B;background:#FFFBF2;border-radius:10px;padding:10px 14px;margin:0 0 12px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.alert.ok{border-color:var(--line);background:#fff;color:var(--mute)}.alert b{font-weight:600}
+table{border-collapse:collapse;width:100%}td.nm{min-width:170px}td.fl{min-width:180px}td.pn{min-width:120px}td.sc{min-width:110px}td.bl{min-width:135px;max-width:170px;word-break:break-all;font-size:13px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--mute);font-weight:500;white-space:nowrap;position:sticky;top:0;background:#fff}
+td.n{text-align:right;white-space:nowrap}
+tr.go{cursor:pointer}tr.go:hover td{background:var(--soft)}
+.wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:calc(100vh - 330px);min-height:180px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;border:1px solid;white-space:nowrap}
+.c-sign{color:#7C3AED;border-color:#DDD0FB;background:#fff}.c-wait{color:var(--warn);border-color:#F3C98B;background:#fff}.c-done{color:var(--ok);border-color:#A7E3C9;background:#fff}
+.c-late{color:var(--bad);border-color:#F5B5B5;background:#fff}
+.tag{font-size:11.5px;color:var(--mute);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-left:6px;white-space:nowrap}
+.pdot{width:8px;height:8px;border-radius:50%;background:#D62020;display:inline-block;animation:pd 1.2s ease-in-out infinite}@keyframes pd{0%,100%{box-shadow:0 0 0 0 rgba(214,32,32,.6)}50%{box-shadow:0 0 0 6px rgba(214,32,32,0)}}@media(prefers-reduced-motion:reduce){.pdot{animation:none}}.mut{color:var(--mute);font-size:12.5px}.age{font-weight:600}.age.m{color:var(--warn)}.age.h{color:var(--bad)}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+#load{padding:40px;text-align:center;color:var(--mute)}
+.box{border:1px solid var(--line);border-radius:12px;padding:16px 18px;max-width:640px;margin:0 0 14px}
+.box h3{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:center}.hint{color:var(--mute);font-size:12.5px;margin:4px 0 10px;line-height:1.6}
+.err{color:var(--bad)}.okc{color:var(--ok)}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.wrap{max-height:none}.hide-m{display:none}}
+</style>
+</head>
+<body>
+<header><h1>NC พนักงาน</h1><div class="sub" id="hsub"></div></header>
+<main>
+  <div id="load">กำลังโหลดข้อมูล…</div>
+  <div id="app" style="display:none"></div>
+</main>
+<script>
+// ===== ตั้งค่า: URL ของ GAS ระบบ NC (Code_nc_v1.0.gs) =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbyoCSXNhBLI7XLhVr4aG05dYhoa0ThSVT3yphMoDCUFsuYUFGdQ1-MpKETBxWVsPnkH4Q/exec';
+const APP_VERSION = 'v1.2 · 2026-11-04';
+
+const QS=new URLSearchParams(location.search);
+if(QS.get('embed')==='1')document.documentElement.classList.add('emb');
+const ONLY=QS.get('only')||'';            // all = ทุกสาขา · br = สาขาเดียว (?b=รหัส)
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TH_M=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s||'');return m?`${+m[3]} ${TH_M[+m[2]]} ${(+m[1]+543)%100}`:(s||'-')};
+const ageOf=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s||'');if(!m)return null;return Math.max(0,Math.floor((Date.now()-new Date(+m[1],+m[2]-1,+m[3]))/864e5))};
+const sg=n=>`<svg class="i" viewBox="0 0 24 24">${n}</svg>`;
+const IC={lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>',up:'<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>',flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>',chk:'<path d="M20 6L9 17l-5-5"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'};
+const ic=n=>sg(IC[n]);
+
+/* ---------- สถานะ ----------  ลำดับสันนิษฐาน: รอลงนาม → รอรับ → รับเอกสารแล้ว */
+const ST=[{k:'รอลงนาม',c:'c-sign',col:'#7C3AED',d:'ออกเอกสารแล้ว · รอลงนาม'},{k:'รอรับ',c:'c-wait',col:'#B45309',d:'รอพนักงานมารับเอกสาร'},{k:'รับเอกสารแล้ว',c:'c-done',col:'#047857',d:'ปิดเรื่องแล้ว'}];
+const isClaim=o=>/ยินยอมชำระ/.test(o.penalty||'');
+const stIdx=s=>{const i=ST.findIndex(x=>x.k===s);return i<0?1:i};
+const shortPen=s=>/ยินยอมชำระ/.test(s)?'ยินยอมชำระค่าเสียหาย':/ตักเตือน/.test(s)?'ตักเตือนเป็นลายลักษณ์อักษร':(String(s||'').split(' / ')[0]||'-');
+
+/* ---------- จับคู่ชื่อ DC → สาขา ---------- */
+const ALIAS={'Dสาย3':'Dพุทธมณฑลสาย3'};
+function nk(s){s=String(s||'').replace(/[\(\[（][^\)\]）]*[\)\]）]/g,'').replace(/^\s*\d+\s*[-:.]?\s*/,'').trim();if(!s)return'';const t=/shop/i.test(s)?'S':'D';const core=s.replace(/^(nim\s*)?(shop|cdc|dc)\s*/i,'').replace(/\s+/g,'');const k=t+core;return ALIAS[k]||k}
+const nid=x=>String(x==null?'':x).replace(/[^0-9A-Za-z]/g,'').toUpperCase().replace(/^0+/,'');
+let CTX={branches:[],br:'',lock:'',empIds:[]},BRK=new Map(),BRC=new Map();
+function setCtx(c){CTX=Object.assign({branches:[],br:'',lock:'',empIds:[]},c||{});BRK=new Map();BRC=new Map();CTX.branches.forEach(b=>{BRK.set(nk(b.name),b);BRC.set(String(b.code),b)});}
+function brOf(dc){const k=nk(dc);let b=BRK.get(k);if(b)return b;if(k.length>3)for(const [kk,v] of BRK)if(kk[0]===k[0]&&(kk.includes(k.slice(1))||k.includes(kk.slice(1)))&&kk.length>3)return v;return null}
+
+let DATA=null,ROWS=[],ERR='';
+const BR_CODE=()=>ONLY==='br'?(QS.get('b')||CTX.br||''):'';
+function build(){
+  const emp=new Set((CTX.empIds||[]).map(nid)),res=new Set(DATA.resigned||[]),want=BR_CODE(),C=DATA.cols,ix=n=>C.indexOf(n);
+  ROWS=DATA.rows.map(r=>{const o={};C.forEach((c,i)=>o[c]=r[i]);
+    o.b=brOf(o.dc);o.age=ageOf(o.issued);o.si=stIdx(o.status);o.res=res.has(o.empId);
+    o.mine=want?((o.b&&String(o.b.code)===String(want))||emp.has(nid(o.empId))):true;return o}).filter(o=>o.mine);
+  // ลำดับ: ยังไม่ปิดเรื่อง (รอรับเก่าสุดก่อน) → ปิดแล้ว
+  ROWS.sort((a,b)=>(a.si===2)-(b.si===2)||(b.age||0)-(a.age||0));
+}
+function jsonp(params){return new Promise((res,rej)=>{const cb='__cb'+Date.now()+Math.floor(Math.random()*1e6),s=document.createElement('script');
+  const t=setTimeout(()=>{cl();rej(new Error('หมดเวลาเชื่อมต่อ'))},60000);function cl(){clearTimeout(t);delete window[cb];s.remove()}
+  window[cb]=d=>{cl();res(d)};s.onerror=()=>{cl();rej(new Error('เชื่อมต่อ GAS ไม่ได้'))};
+  s.src=API_URL+'?'+new URLSearchParams({...params,callback:cb}).toString();document.body.appendChild(s)})}
+async function post(body){const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(body)});return r.json()}
+const keyGet=()=>{try{return localStorage.getItem('nc_key')||''}catch(e){return''}};const keySet=k=>{try{localStorage.setItem('nc_key',k)}catch(e){}};
+
+async function load(){
+  $('load').style.display='';$('app').style.display='none';
+  if(!API_URL){$('load').innerHTML='ยังไม่ได้ตั้งค่า API_URL ใน nc.html (ใส่ URL ของ Code_nc_v1.0.gs หลัง Deploy)';return}
+  try{const r=await jsonp({action:'ncList'});if(!r.ok)throw new Error(r.error||'โหลดไม่สำเร็จ');DATA=r;build();paint();}
+  catch(e){$('load').innerHTML=`<span class="err">โหลดข้อมูลไม่สำเร็จ: ${esc(e.message)}</span>`}
+}
+
+/* ---------- หน้าจอ ---------- */
+let F={grp:'nc',st:'',q:'',reg:'',br:'',hideRes:false,view:'case',mode:ONLY==='all'&&QS.get('mode')==='imp'?'imp':'list'};
+function paint(){
+  $('load').style.display='none';$('app').style.display='';
+  const at=DATA.at?`ข้อมูล ณ ${thDate(DATA.at.slice(0,10))} ${DATA.at.slice(11,16)} น.`:'';
+  $('hsub').textContent=at;
+  if(F.mode==='imp'){bodyImport();return}
+  const base=ROWS.filter(o=>!(F.hideRes&&o.res));
+  const gc={nc:0,claim:0,ncOpen:0,claimOpen:0};base.forEach(o=>{const k=isClaim(o)?'claim':'nc';gc[k]++;if(o.si<2)gc[k+'Open']++});
+  const mine=base;
+  const open=mine.filter(o=>o.si<2),late=mine.filter(o=>o.si===1&&(o.age||0)>30);
+  const emps=new Set(open.map(o=>o.empId));
+  const cnt=k=>mine.filter(o=>o.status===k).length;
+  const pend=mine.filter(o=>o.si===1);
+  const old60=pend.filter(o=>(o.age||0)>60).length,old30=pend.filter(o=>(o.age||0)>30&&(o.age||0)<=60).length;
+  let h='';
+  if(ONLY==='br'){
+    h+=emps.size?`<div class="alert">${sg(IC.flag)}<div><b>พนักงานในสาขามี NC ที่ยังไม่ปิดเรื่อง ${emps.size} คน · ${open.length} เคส</b><br><span class="mut">${late.length?`รอรับเกิน 30 วัน ${late.length} เคส · `:''}ให้พนักงานมารับ/เซ็นเอกสารตามสถานะด้านล่าง</span></div></div>`
+      :`<div class="alert ok">${sg(IC.chk)}<div>ไม่มี NC ที่ยังไม่ปิดเรื่องของพนักงานในสาขานี้<br><span class="mut">ตรวจสอบ: สาขา ${esc((CTX.branches.find(b=>String(b.code)===String(BR_CODE()))||{}).name||'ไม่พบสาขา')} · รหัสสาขา ${esc(BR_CODE()||'-')} · พนักงานในรายชื่อ ${(CTX.empIds||[]).length} คน · เคสทั้งหมดในระบบ ${DATA.rows.length}</span></div></div>`}
+  h+=`<div class="cards">`+ST.map((s,i)=>`<div class="card k${F.st===s.k?' on':''}" data-st="${esc(s.k)}"><div class="l"><i class="dot" style="background:${s.col}"></i>${s.k}</div><div class="v">${cnt(s.k)}<small> เคส</small></div><div class="f">${s.d}${i===1&&pend.length?`<br>เกิน 30 วัน <b>${old30+old60}</b> · เกิน 60 วัน <b style="color:var(--bad)">${old60}</b>`:''}</div></div>`).join('')
+    +`<div class="card"><div class="l"><i class="dot" style="background:#111827"></i>พนักงานที่มีเคสค้าง</div><div class="v">${emps.size}<small> คน</small></div><div class="f">จากเคสที่ยังไม่ปิดเรื่อง ${open.length} เคส</div></div></div>`;
+  h+=`<div class="flow">ขั้นตอน: ${ST.map(s=>`<span class="chip ${s.c}">${s.k}</span>`).join(' '+ic('arrow')+' ')}<span class="hide-m"> · สถานะตามรายงานทีมมาตรฐาน</span></div>`;
+  // ตัวกรอง
+  const regs=[...new Set(mine.map(o=>o.b&&o.b.region).filter(Boolean))].sort(),brs=[...new Map(mine.filter(o=>o.b&&(!F.reg||o.b.region===F.reg)).map(o=>[o.b.code,o.b.name])).entries()].sort((a,b)=>a[1]<b[1]?-1:1);
+  h+=`<div class="bar"><div class="seg"><button data-v="case" class="${F.view==='case'?'on':''}">รายเคส</button><button data-v="emp" class="${F.view==='emp'?'on':''}">รายพนักงาน</button></div>
+    <input type="search" id="fQ" placeholder="ค้นหา ชื่อ / รหัส / เลข NC / เลขบิล" value="${esc(F.q)}" style="min-width:250px">
+    <select id="fS"><option value="">ทุกสถานะ</option>${ST.map(s=>`<option ${F.st===s.k?'selected':''}>${s.k}</option>`).join('')}</select>
+    ${ONLY!=='br'&&CTX.branches.length?`<select id="fR"><option value="">ทุกภาค</option>${regs.map(r=>`<option ${F.reg===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select id="fB"><option value="">ทุกสาขา</option>${brs.map(([c,n])=>`<option value="${esc(c)}" ${F.br===String(c)?'selected':''}>${esc(n)}</option>`).join('')}</select>`:''}
+    <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fH" ${F.hideRes?'checked':''}> ซ่อนผู้ที่ลาออกแล้ว</label><div class="sp"></div>
+    ${ONLY==='all'&&!QS.get('lock')?`<button class="b" id="bImp">${ic('up')}นำเข้า Excel</button>`:''}</div>`;
+  const q=F.q.trim().toLowerCase();
+  const L=mine.filter(o=>(!F.st||o.status===F.st)&&(!F.reg||(o.b&&o.b.region===F.reg))&&(!F.br||(o.b&&String(o.b.code)===F.br))&&(!q||[o.name,o.empId,o.ncNo,o.bill].some(x=>String(x||'').toLowerCase().includes(q))));
+  const sec=(t,sub,A)=>`<div class="sec"><h2>${t}</h2><span>${sub}</span></div>`+(F.view==='case'?tblCase(A):tblEmp(A));
+  const A1=L.filter(o=>!isClaim(o)),A2=L.filter(isClaim),op=A=>A.filter(o=>o.si<2).length;
+  h+=sec('เอกสาร NC ทีมมาตรฐาน',`${A1.length} เคส · ค้าง ${op(A1)}`,A1)+sec('เคลม · ยินยอมชำระค่าเสียหายให้แก่บริษัท',`${A2.length} เคส · ค้าง ${op(A2)}`,A2);
+  $('app').innerHTML=h;wire();
+}
+const statusChip=o=>{const s=ST[o.si];const late=o.si===1&&(o.age||0)>30;const hot=o.si<2&&(o.age||0)>60;return `<span class="chip ${late?'c-late':s.c}">${hot?'<i class="pdot"></i>':''}${s.k}</span>`};
+const ageHtml=o=>{if(o.age==null)return'';if(o.si===2)return `<span class="mut">${o.age} วัน</span>`;return `<span class="age ${o.age>30?'h':o.age>14?'m':''}">${o.age} วัน</span>`};
+function tblCase(L){
+  if(!L.length)return `<div class="wrap"><div class="empty">ไม่พบเคส NC ตามเงื่อนไข</div></div>`;
+  const all=ONLY!=='br';
+  return `<div class="wrap"><table><thead><tr><th>สถานะ</th><th>เลขที่ NC</th><th>ออกเมื่อ</th><th class="n">ค้าง</th><th>พนักงาน</th>${all?'<th>สาขา / หน่วยงาน</th>':''}<th class="hide-m">เลขที่บิล</th><th>ลักษณะความผิด</th><th>บทลงโทษ</th></tr></thead><tbody>`+
+  L.slice(0,500).map(o=>`<tr${all&&o.b?` class="go" data-go="${esc(o.b.code)}"`:''}><td>${statusChip(o)}${o.statusAt&&o.prevStatus?`<div class="mut" style="margin-top:3px">เปลี่ยนจาก${esc(o.prevStatus)} ${thDate(o.statusAt.slice(0,10))}</div>`:''}</td>
+    <td style="white-space:nowrap">${esc(o.ncNo)}</td><td style="white-space:nowrap">${thDate(o.issued)}</td><td class="n">${ageHtml(o)}</td>
+    <td class="nm"><b>${esc(o.name)}</b>${o.res?'<span class="tag">ลาออกแล้ว</span>':''}<div class="mut">${esc(o.empId)}${o.position?' · '+esc(o.position):''}</div></td>
+    ${all?`<td class="sc">${o.b?esc(o.b.name):`<span class="mut">${esc(o.dc||'ไม่ระบุ')}</span><span class="tag">ไม่พบสาขา</span>`}</td>`:''}
+    <td class="hide-m bl">${esc(o.bill)}</td><td class="fl">${esc(o.fault)}<div class="mut">${esc(o.step)}</div></td><td class="pn" title="${esc(o.penalty)}">${esc(shortPen(o.penalty))}</td></tr>`).join('')+
+  `</tbody></table></div>${L.length>500?`<div class="mut" style="margin-top:6px">แสดง 500 จาก ${L.length} เคส · ใช้ตัวกรองเพื่อแคบลง</div>`:''}`;
+}
+function tblEmp(L){
+  const M=new Map();L.forEach(o=>{let e=M.get(o.empId);if(!e)M.set(o.empId,e={id:o.empId,name:o.name,pos:o.position,b:o.b,dc:o.dc,res:o.res,n:0,open:0,old:0,c:[0,0,0]});e.n++;e.c[o.si]++;if(o.si<2){e.open++;e.old=Math.max(e.old,o.age||0)}});
+  const R=[...M.values()].sort((a,b)=>b.open-a.open||b.old-a.old||b.n-a.n);
+  if(!R.length)return `<div class="wrap"><div class="empty">ไม่พบพนักงานตามเงื่อนไข</div></div>`;
+  const all=ONLY!=='br';
+  return `<div class="wrap"><table><thead><tr><th>พนักงาน</th>${all?'<th>สาขา / หน่วยงาน</th>':''}<th class="n">เคสทั้งหมด</th><th class="n">ยังไม่ปิดเรื่อง</th><th class="n">ค้างนานสุด</th><th>แยกตามสถานะ</th></tr></thead><tbody>`+
+  R.slice(0,500).map(e=>`<tr${all&&e.b?` class="go" data-go="${esc(e.b.code)}"`:''}><td><b>${esc(e.name)}</b>${e.res?'<span class="tag">ลาออกแล้ว</span>':''}<div class="mut">${esc(e.id)}${e.pos?' · '+esc(e.pos):''}</div></td>
+    ${all?`<td>${e.b?esc(e.b.name):`<span class="mut">${esc(e.dc||'ไม่ระบุ')}</span>`}</td>`:''}<td class="n">${e.n}</td><td class="n"><b>${e.open||'-'}</b></td><td class="n">${e.open?`<span class="age ${e.old>30?'h':e.old>14?'m':''}">${e.old} วัน</span>`:'-'}</td>
+    <td>${ST.map((s,i)=>e.c[i]?`<span class="chip ${s.c}" style="margin-right:4px">${s.k} ${e.c[i]}</span>`:'').join('')}</td></tr>`).join('')+`</tbody></table></div>`;
+}
+function wire(){
+  $('app').querySelectorAll('[data-st]').forEach(c=>c.onclick=()=>{F.st=F.st===c.dataset.st?'':c.dataset.st;paint()});
+  $('app').querySelectorAll('[data-v]').forEach(c=>c.onclick=()=>{F.view=c.dataset.v;paint()});
+  const q=$('fQ');if(q){q.oninput=()=>{F.q=q.value;clearTimeout(q._t);q._t=setTimeout(()=>{paint();const n=$('fQ');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)}}
+  if($('fS'))$('fS').onchange=e=>{F.st=e.target.value;paint()};if($('fR'))$('fR').onchange=e=>{F.reg=e.target.value;F.br='';paint()};if($('fB'))$('fB').onchange=e=>{F.br=e.target.value;paint()};
+  $('fH').onchange=e=>{F.hideRes=e.target.checked;paint()};if($('bImp'))$('bImp').onclick=()=>{F.mode='imp';paint()};
+  $('app').querySelectorAll('tr[data-go]').forEach(r=>r.onclick=()=>{try{parent.postMessage({type:'nc:go',code:r.dataset.go},'*')}catch(e){}});
+}
+
+/* ---------- นำเข้า Excel ---------- */
+const NEED=['เลขที่ NC','วันที่ออก','วันที่เกิดเหตุ','เลขที่บิล','ประเภทบิล','รหัสพนักงาน','ชื่อ-นามสกุล','ตำแหน่ง','DC / หน่วยงาน','Department','ขั้นตอน','รหัสความผิด','ลักษณะความผิด','ระดับ','แผนก (ความผิด)','บทลงโทษ','มูลค่าชดใช้','จำนวนงวด','เริ่มหักเดือน','ผู้ออกเอกสาร','วันที่รับคืน','สถานะ','ที่มา'];
+const DATEC=new Set(['วันที่ออก','วันที่เกิดเหตุ','วันที่รับคืน']);
+const isoD=s=>{s=String(s||'').trim();const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);if(!m)return s;let y=+m[3];if(y>2400)y-=543;return `${y}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`};
+let IMP=null;
+function bodyImport(){
+  const key=keyGet();let h=`<div class="bar"><button class="b" id="bBack">กลับไปหน้ารายการ</button></div>`;
+  if(!key){$('app').innerHTML=h+`<div class="box"><h3>${ic('lock')}นำเข้ารายงาน NC</h3><div class="hint">ใส่รหัสผู้ดูแล (ตั้งในชีต CONFIG ช่อง B2 ของ GAS NC)</div><div class="bar"><input type="password" id="imKey" placeholder="รหัสผู้ดูแล"><button class="b pri" id="imUnlock">ปลดล็อก</button></div><div id="imMsg" class="hint"></div></div>`;
+    $('bBack').onclick=()=>{F.mode='list';paint()};
+    $('imUnlock').onclick=async()=>{const k=$('imKey').value.trim();if(!k)return;$('imMsg').textContent='กำลังตรวจรหัส…';try{const r=await post({action:'checkKey',key:k});if(!r.ok)throw new Error(r.error||'รหัสไม่ถูกต้อง');keySet(k);bodyImport()}catch(e){$('imMsg').innerHTML=`<span class="err">${esc(e.message)}</span>`}};
+    $('imKey').addEventListener('keydown',e=>{if(e.key==='Enter')$('imUnlock').click()});return}
+  $('app').innerHTML=h+`<div class="box"><h3>${ic('up')}นำเข้ารายงาน NC (Excel จากทีมมาตรฐาน)</h3><div class="hint">ไฟล์ต้องมีชีต "เคส NC" และ "รายชื่อพนักงาน" · ระบบอัปเดตตามเลขที่ NC (เคสเดิมที่สถานะเปลี่ยนจะบันทึกว่าเปลี่ยนจากสถานะไหนเมื่อไร) · ไม่ลบเคสที่ไม่อยู่ในไฟล์ · ไม่ส่งมูลค่าชดใช้ไปแสดงที่หน้าเว็บ</div>
+    <div class="bar"><input type="file" id="imF" accept=".xls,.xlsx"><button class="b pri" id="imGo" disabled>ยืนยันนำเข้า</button></div><div id="imStage" class="hint"></div></div>`;
+  $('bBack').onclick=()=>{F.mode='list';paint()};
+  $('imF').onchange=async e=>{const f=e.target.files[0];IMP=null;$('imGo').disabled=true;if(!f)return;$('imStage').textContent='กำลังอ่านไฟล์…';
+    try{IMP=await parseXlsx(f);$('imStage').innerHTML=previewHtml(IMP);$('imGo').disabled=false}catch(er){$('imStage').innerHTML=`<span class="err">${esc(er.message)}</span>`}};
+  $('imGo').onclick=async()=>{if(!IMP)return;$('imGo').disabled=true;$('imStage').textContent='กำลังนำเข้า…';
+    try{const r=await post({action:'importNC',key:keyGet(),file:IMP.file,rows:IMP.rows,emps:IMP.emps});if(!r.ok)throw new Error(r.error||'นำเข้าไม่สำเร็จ');
+      $('imStage').innerHTML=`<span class="okc">นำเข้าสำเร็จ</span> · ทั้งหมด ${r.total} เคส · ใหม่ ${r.added} · แก้ไข ${r.changed} · สถานะเปลี่ยน ${r.statusChanged}`;
+      try{parent.postMessage({type:'nc:imported'},'*')}catch(e){}
+      setTimeout(async()=>{F.mode='list';await load()},1200)}catch(er){if(/รหัส/.test(er.message))keySet('');$('imStage').innerHTML=`<span class="err">${esc(er.message)}</span>`;$('imGo').disabled=false}};
+}
+async function parseXlsx(f){
+  const buf=await f.arrayBuffer(),wb=XLSX.read(buf,{type:'array'});
+  const sn=wb.SheetNames.find(n=>/เคส\s*NC/.test(n))||wb.SheetNames[0],R=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:'',raw:false});
+  if(R.length<2)throw new Error('ชีตเคส NC ว่าง');
+  const H=R[0].map(x=>String(x).trim()),ix=NEED.map(n=>H.indexOf(n)),miss=NEED.filter((n,i)=>ix[i]<0);
+  if(miss.length)throw new Error('ไม่พบคอลัมน์: '+miss.join(', ')+' (ตรวจว่าเป็นไฟล์ export จากทีมมาตรฐาน)');
+  const rows=[];R.slice(1).forEach(r=>{if(!String(r[ix[0]]||'').trim())return;rows.push(NEED.map((n,i)=>{let v=String(r[ix[i]]==null?'':r[ix[i]]).trim();if(DATEC.has(n))v=isoD(v);return v}))});
+  if(!rows.length)throw new Error('ไม่พบเคส NC ในไฟล์');
+  let emps=[];const es=wb.SheetNames.find(n=>/รายชื่อพนักงาน/.test(n));
+  if(es){const E=XLSX.utils.sheet_to_json(wb.Sheets[es],{header:1,defval:'',raw:false}),eh=E[0].map(x=>String(x).trim()),EN=['รหัสพนักงาน','ชื่อ-นามสกุล','DC / หน่วยงาน','แผนก','ตำแหน่ง','Level','สถานะพนักงาน'],ei=EN.map(n=>eh.indexOf(n));
+    if(ei.every(i=>i>=0))emps=E.slice(1).filter(r=>String(r[ei[0]]||'').trim()).map(r=>ei.map(i=>String(r[i]==null?'':r[i]).trim()))}
+  return{file:f.name,rows,emps};
+}
+function previewHtml(P){
+  const by={};P.rows.forEach(r=>by[r[21]]=(by[r[21]]||0)+1);
+  const dcs=[...new Set(P.rows.map(r=>r[8]))],unm=dcs.filter(d=>CTX.branches.length&&!brOf(d));
+  const known=new Set(ROWS.length?DATA.rows.map(r=>r[0]):[]),nw=P.rows.filter(r=>!known.has(r[0])).length;
+  const unk=P.rows.filter(r=>!ST.some(s=>s.k===r[21])).length;
+  return `ไฟล์ ${esc(P.file)}<br>เคส <b>${P.rows.length}</b> · ใหม่ประมาณ <b>${nw}</b> · พนักงานในรายชื่อ ${P.emps.length}<br>`+ST.map(s=>`${s.k} ${by[s.k]||0}`).join(' · ')+
+   (unk?`<br><span class="err">มี ${unk} เคสสถานะที่ระบบยังไม่รู้จัก (จะแสดงเป็นขั้น "รอรับ")</span>`:'')+
+   (unm.length?`<br><span class="mut">หน่วยงานที่ไม่พบเป็นสาขาในระบบ ${unm.length} ชื่อ: ${esc(unm.slice(0,8).join(' · '))}${unm.length>8?' …':''} (ยังเห็นในรายการรวม แต่ไม่เตือนสาขาจนกว่ารหัสพนักงานตรงกับรายชื่อสาขา)</span>`:'');
+}
+
+/* ---------- ข้อความจากหน้าหลัก ---------- */
+addEventListener('message',e=>{const d=e.data||{};
+  if(d.type==='nc:ctx'){setCtx(d);if(DATA){build();paint()}}
+  if(d==='nc:refresh'||d.type==='nc:refresh')load()});
+try{parent.postMessage({type:'nc:ready'},'*')}catch(e){}
+if(ONLY==='br'&&QS.get('b'))CTX.br=QS.get('b');
+load();
+</script>
+</body>
+</html>
