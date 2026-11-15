@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>วิธีคิดคะแนน Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--line:#E7EAEF;--line2:#F2F4F7;--ink:#141B26;--ink2:#5A6577;--ink3:#98A1AF;--brand:#1F3A5F;--brandSoft:#EEF2F7;
+  --ok:#1E8A5A;--okSoft:#E3F4EA;--warn:#D97706;--warnSoft:#FBF1D6;--bad:#C0392B;--badSoft:#FBE3E0}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:'IBM Plex Sans Thai',system-ui,sans-serif;font-size:15px;line-height:1.7}
+main{max-width:920px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+h1{font-size:22px;margin:0;line-height:1.3}
+.sub{color:var(--ink3);font-size:13px;margin:0 0 18px 52px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px}
+nav a{border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--brand);text-decoration:none;font-weight:600}
+nav a:hover{background:var(--brandSoft)}
+section{border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(20,27,38,.04)}
+h2{font-size:17px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+h2 .n{background:var(--brand);color:#fff;border-radius:8px;width:24px;height:24px;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+h3{font-size:15px;margin:16px 0 6px}
+p{margin:6px 0}
+ul{margin:6px 0;padding-left:22px}li{margin:3px 0}
+.f{background:#F7F9FB;border-radius:10px;padding:8px 12px;font-size:14px;margin:8px 0;border-left:3px solid var(--brand)}
+.q{color:var(--ink3);font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border-bottom:1px solid var(--line2);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:#F7F9FB;color:var(--ink2);font-weight:600;font-size:12.5px}
+.tw{overflow-x:auto}
+.chip{display:inline-block;border-radius:999px;padding:0 9px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.ok{background:var(--okSoft);color:var(--ok)}.warn{background:var(--warnSoft);color:var(--warn)}.bad{background:var(--badSoft);color:var(--bad)}.na{background:var(--line2);color:var(--ink2)}
+.ex{background:#FFFBEB;border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box{background:#F7F9FB;border-radius:12px;padding:12px 14px}
+.box b{display:block;margin-bottom:4px}
+footer{color:var(--ink3);font-size:12.5px;text-align:center;margin-top:24px}
+@media(max-width:640px){main{padding:18px 16px 40px}.two{grid-template-columns:1fr}.sub{margin-left:0}}
+@media print{nav{display:none}section{break-inside:avoid;box-shadow:none}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></div>
+<h1>วิธีคิดคะแนน Performance สาขา</h1></header>
+<p class="sub">ใช้กับหน้า Performance (branch_perf) · คะแนน DC และคะแนน Shop</p>
+
+<nav><a href="#s1">หลักการ</a><a href="#sw">น้ำหนัก</a><a href="#sc">คะแนนตามเกณฑ์</a><a href="#s2">กลุ่มแข่งขัน</a><a href="#s3">คะแนน DC 6 มิติ</a><a href="#s4">คะแนน Shop 4 มิติ</a><a href="#s5">ข้อมูลขาด</a><a href="#s6">สีและระดับ</a><a href="#s7">แหล่งข้อมูล</a></nav>
+
+<section id="s1"><h2><span class="n">1</span>หลักการ</h2>
+<ul>
+<li><b>เทียบกับเพื่อนขนาดใกล้กัน</b> ไม่ใช่เทียบตัวเลขดิบ สาขาเล็กจึงไม่เสียเปรียบสาขาใหญ่</li>
+<li>แต่ละมิติให้คะแนน 0–100 ตาม <b>ตำแหน่ง (เปอร์เซ็นไทล์)</b> ในกลุ่ม: 50 = กลาง ๆ ของกลุ่ม, 100 = ดีที่สุด, 0 = แย่ที่สุด</li>
+<li><b>คะแนนรวม = ค่าเฉลี่ยถ่วงน้ำหนักของทุกมิติที่มีข้อมูล</b> (ดูน้ำหนักปัจจุบันในหัวข้อถัดไป) · มิติที่ไม่มีข้อมูล น้ำหนักจะเกลี่ยให้มิติที่เหลือตามสัดส่วน</li>
+<li>ยอดขายวัด <b>เทียบเป้าของสาขาตัวเอง</b> · ค่าใช้จ่ายวัด <b>% ต่อยอดขายเทียบเกณฑ์ 25%</b> จึงยุติธรรมกับสาขาที่ทำเลหรือขนาดต่างกัน</li>
+<li><b>ข้อยกเว้น:</b> มิติค่าใช้จ่ายให้คะแนนตามเกณฑ์ (ไม่เทียบตำแหน่งในกลุ่ม)</li>
+<li><b>ดูตัวเลขจริงของสาขาตัวเอง:</b> ในหน้า Performance แตะการ์ดแต่ละมิติ (หรือวงคะแนนรวม) จะเห็นตัวเลข การคำนวณแทนค่า ตำแหน่งในกลุ่มพร้อมชื่อทุกสาขา และผลต่อคะแนนรวม</li>
+<li>มี 2 ระดับ: <b>DC</b> (รวมผลของ Shop ในสังกัด) และ <b>Shop</b> (แต่ละร้าน เทียบ Shop ทั่วประเทศ)</li>
+</ul>
+<div class="f">คะแนนมิติ = จำนวนสาขาที่เรา<b>ดีกว่าหรือเท่ากัน</b> (ไม่นับตัวเอง) ÷ (จำนวนสาขาในกลุ่มที่มีข้อมูล − 1) × 100 · ที่ 1 ของกลุ่ม = 100 · ที่สุดท้าย = 0 · สาขาที่ตัวเลขเท่ากันได้คะแนนเท่ากัน</div>
+<div class="ex">ตัวอย่าง: กลุ่มมี 20 สาขา เราดีกว่า 15 สาขา เท่ากับเรา 1 สาขา → (15 + 1) ÷ 19 × 100 = <b>84 คะแนน</b> · ถ้า 3 สาขามาทำงาน 100% เท่ากันที่ดีที่สุด ทั้ง 3 สาขาได้ <b>100</b><br>
+มิติที่ “ยิ่งน้อยยิ่งดี” (ค่าใช้จ่ายเกินแผน) นับกลับด้าน คือนับสาขาที่ใช้มากกว่าเรา</div>
+<p class="q">มิติใดมีสาขาที่มีข้อมูลน้อยกว่า 3 สาขาในกลุ่ม จะไม่คิดคะแนนมิตินั้น</p>
+</section>
+
+<section id="sw"><h2><span class="n">★</span>น้ำหนักคะแนน (ใช้อยู่ตอนนี้)</h2>
+<p class="q" id="wSrc">กำลังโหลดค่าจาก Google Sheet…</p>
+<div class="two" id="wBox"></div>
+<div class="f">คะแนนรวม = Σ (คะแนนมิติ × น้ำหนัก) ÷ Σ น้ำหนักของมิติที่มีข้อมูล</div>
+<div class="ex">ตัวอย่าง: ยอดขาย 80 (20%) · ค่าใช้จ่าย 60 (20%) · กำลังคน 50 (15%) · ชิ้นต่อคน 40 (15%) · วินัย 90 (15%) · บิล 70 (15%)<br>= 16 + 12 + 7.5 + 6 + 13.5 + 10.5 = <b>65.5 → 66 คะแนน</b></div>
+<p class="q">แก้น้ำหนักได้ที่ Google Sheet ระบบตารางกะ › ชีต <b>M_PerfWeight</b> คอลัมน์ weight (ไม่จำเป็นต้องรวมได้ 100 · 0 = ไม่นำมิตินั้นมาคิด)</p>
+</section>
+
+<section id="sc"><h2><span class="n">◎</span>2 โหมดคะแนน: อันดับในกลุ่ม · ตามเกณฑ์</h2>
+<div class="two">
+<div class="box"><b>อันดับในกลุ่ม (ค่าตั้งต้น)</b>เทียบตำแหน่งกับสาขาในกลุ่มแข่งขันเดียวกัน · ใช้หา <b>สาขาดีเด่น</b> และจุดที่ด้อยกว่าเพื่อน · เป็นการแข่งขัน ต้องมีคนได้คะแนนต่ำเสมอ</div>
+<div class="box"><b>ตามเกณฑ์</b>เทียบกับ <b>เป้าตายตัว</b> · ถึงเกณฑ์ = 100 ทุกสาขา ไม่ต้องแข่งกันเอง · ถ้าทุกสาขาทำได้ ทุกสาขาได้คะแนนเต็มเท่ากัน</div>
+</div>
+<div class="tw"><table><tr><th>มิติ</th><th>ได้ 100 เมื่อ</th><th>ได้ 0 เมื่อ</th></tr>
+<tr><td>ยอดขาย (% ของเป้าตามวัน)</td><td>≥ 100%</td><td>≤ 80%</td></tr>
+<tr><td>ค่าใช้จ่ายรวม % ยอดขาย</td><td>≤ 25%</td><td>เกินทุก 1% หัก 5 คะแนน</td></tr>
+<tr><td>% มาทำงาน</td><td>≥ 95%</td><td>≤ 80%</td></tr>
+<tr><td>ชิ้นต่อคน (% ของค่ากลางกลุ่ม)</td><td>≥ 100%</td><td>≤ 60%</td></tr>
+<tr><td>วินัย: To Do / ส่งตารางกะ / ปิด NC</td><td>To Do ≥ 95 · ตารางกะ ส่งแล้ว · NC ไม่ค้าง</td><td>To Do ≤ 70 · ไม่กรอก · ค้างทั้งหมด</td></tr>
+<tr><td>% บิลไม่เกินอายุ</td><td>≥ 98%</td><td>≤ 90%</td></tr></table></div>
+<div class="f">คะแนน = (ค่าจริง − ค่าที่ได้ 0) ÷ (ค่าที่ได้ 100 − ค่าที่ได้ 0) × 100 · ไม่ต่ำกว่า 0 ไม่เกิน 100</div>
+<p class="q">ทุกเกณฑ์แก้ได้ในชีต M_PerfWeight (level = เกณฑ์ / ตั้งค่า) · สลับโหมดได้ที่ปุ่ม "อันดับในกลุ่ม | ตามเกณฑ์" ในหน้า Performance</p>
+</section>
+
+<section id="s2"><h2><span class="n">2</span>กลุ่มแข่งขัน (ใช้กับ DC)</h2>
+<p>แบ่ง DC ทั้งหมดเป็น <b>3 กลุ่มเท่าๆ กัน</b> ตามยอดขายเฉลี่ยต่อเดือน (งบสาขา 3 เดือนล่าสุด รวม Shop ในสังกัด) แล้วเทียบคะแนนกันภายในกลุ่ม</p>
+<div class="tw"><table><tr><th>กลุ่ม</th><th>ใคร</th><th>ตัวอย่างช่วงยอดขาย (ส.ค.–ต.ค.)</th></tr>
+<tr><td><b>ใหญ่</b></td><td>1 ใน 3 ที่ยอดขายสูงสุด (~20 DC)</td><td>ประมาณ 0.85 – 6.5 ล้าน/เดือน</td></tr>
+<tr><td><b>กลาง</b></td><td>1 ใน 3 ตรงกลาง (~20 DC)</td><td>ประมาณ 0.62 – 0.85 ล้าน/เดือน</td></tr>
+<tr><td><b>เล็ก</b></td><td>1 ใน 3 ที่ยอดขายต่ำสุด (~20 DC)</td><td>ประมาณ 0.18 – 0.59 ล้าน/เดือน</td></tr></table></div>
+<ul>
+<li>ระบบจัดกลุ่มใหม่อัตโนมัติเมื่อมีงบเดือนใหม่ สาขาอาจย้ายกลุ่มได้ถ้ายอดขายเปลี่ยน</li>
+<li>ทุกกลุ่มมีคู่แข่งพอๆ กัน (~20 สาขา) และขนาดใกล้กันจริง</li>
+<li>ขนาดตามเกณฑ์ PEP (N / S / M / L / XL ในชีต M_Branch) ยังแสดงในหน้าเว็บ แต่ไม่ใช้จัดกลุ่มแข่งขัน</li>
+<li>Shop เทียบกับ Shop ทั่วประเทศ (ไม่แบ่งกลุ่ม)</li>
+</ul>
+</section>
+
+<section id="s3"><h2><span class="n">3</span>คะแนน DC · 6 มิติ</h2>
+<p>คะแนนของ DC <b>รวมผลของ Shop ในสังกัด</b>ด้วย เพราะผู้จัดการ DC ดูแลทั้งหน่วย (ยกเว้นชิ้นต่อคนที่วัดเฉพาะ DC)</p>
+<div class="tw"><table>
+<tr><th style="width:130px">มิติ</th><th>วัดอะไร / สูตร</th><th style="width:150px">รวม Shop อย่างไร</th></tr>
+<tr><td><b>1. ยอดขาย</b><br><span class="q">ยิ่งสูงยิ่งดี</span></td><td>ยอดขาย MTD เทียบ<b>เป้ายอดขาย</b> (เป้าเดียวกับหน้ายอดขาย) ตามสัดส่วนวันที่ผ่านไป<div class="f">เป้าเดือน = เป้าในชีต S_TARGET (ถ้ามี) · ไม่มี = ยอดขายเดือนก่อนทั้งเดือน × 1.20 × วันเดือนนี้ ÷ วันเดือนก่อน<br>% ของเป้า = ยอดขาย MTD ÷ (เป้าเดือน × วันที่ผ่านไป ÷ วันในเดือน)</div></td><td>ยอดขายและแผนของ DC + ทุก Shop รวมกัน</td></tr>
+<tr><td><b>2. ค่าใช้จ่าย</b><br><span class="q">ยิ่งต่ำยิ่งดี</span></td><td><b>ค่าใช้จ่ายรวม % ของยอดขาย</b> ใน 3 เดือนบัญชีล่าสุด เทียบเกณฑ์ <b>25%</b> (คะแนนตามเกณฑ์ ไม่ได้เทียบกับกลุ่ม)<div class="f">% = (ค่าใช้จ่ายดำเนินงาน + เงินเดือน + ต้นทุนเข้ารับ) ÷ ยอดขายบัญชี<br>คะแนน = 100 ถ้าไม่เกิน 25% · เกินแล้วหัก 5 คะแนนต่อทุก 1% (เช่น 27% = 90 · 30% = 75 · 35% = 50 · 45% ขึ้นไป = 0)</div><span class="q">ใช้ยอดขายจากงบสาขา (P&amp;L) เดือนเดียวกับค่าใช้จ่าย · เดือนที่บัญชียังไม่ปิดยังไม่นับ · ไม่แสดงยอดเงินเดือนและต้นทุนเข้ารับ · เกณฑ์และคะแนนที่หักตั้งได้ในชีต M_PerfWeight (ตั้งค่า)</span></td><td>รวมค่าใช้จ่ายและยอดขายของ DC + Shop ในสังกัด</td></tr>
+<tr><td><b>3. กำลังคน</b><br><span class="q">ยิ่งสูงยิ่งดี</span></td><td>% มาทำงาน ตามตารางกะเดือนนี้ (ลา/ขาด ทำให้ต่ำลง) · <b>ไม่นับ พขร.</b> (พนักงานขับรถบริษัท)</td><td>เฉลี่ยถ่วงน้ำหนักตามจำนวนพนักงานของแต่ละหน่วย · Shop ที่ไม่กรอกตารางกะ = 0%</td></tr>
+<tr><td><b>4. ชิ้นต่อคน</b><br><span class="q">ยิ่งสูงยิ่งดี</span></td><td>ประสิทธิภาพการจัดคนจริง (ไม่นับ พขร.)<div class="f">ชิ้นต่อคน = ยอดปล่อยออก (ชิ้น) ÷ (จำนวนคนในสาขา × วันที่มียอด)</div><span class="q">ไม่หักวันลา/ขาด เพื่อวัดว่าจัดคนพอดีกับงานหรือไม่</span></td><td><b>เฉพาะ DC</b> (ยอดปล่อยนับที่ DC)</td></tr>
+<tr><td><b>5. To Do · วินัย</b><br><span class="q">ยิ่งสูงยิ่งดี</span></td><td>ค่าเฉลี่ยถ่วงน้ำหนักของ 3 ส่วน (แต่ละส่วนคิดเปอร์เซ็นไทล์ในกลุ่มก่อน · น้ำหนักย่อยดูหัวข้อน้ำหนัก):<br>• คะแนน To Do (งานประจำวัน)<br>• การส่งตารางกะเดือนนี้<br>• การปิดเรื่อง NC ทันเวลา</td><td>To Do = เฉลี่ย DC + Shop<br>ตารางกะ = เฉลี่ยสถานะของทุกหน่วย<br>NC = รวมเคสของ DC + Shop</td></tr>
+<tr><td><b>6. บิล</b><br><span class="q">ยิ่งสูงยิ่งดี</span></td><td><b>% บิลไม่เกินอายุ ณ ปัจจุบัน</b> จากระบบติดตามสถานะบิล (ภาพล่าสุด ณ รอบดึงข้อมูลล่าสุด)<div class="f">% ไม่เกินอายุ = 1 − บิลเกินอายุ ÷ บิลค้างที่สาขาถืออยู่</div><div class="ex">ตัวอย่าง: ถือบิลค้าง 200 ใบ เกินอายุ 10 ใบ → 1 − 10 ÷ 200 = <b>95%</b></div><span class="q">อายุบิล: แห้ง 7 วัน · เย็น 5 วัน · กลุ่ม W N X R เคลียร์ 7 วัน · <b>นับรวมกลุ่ม R (รอเอกสารนำกลับ)</b> เพราะสาขาต้องเคลียร์เอกสารนำกลับ · เคลียร์บิลเกินอายุวันนี้ คะแนนขึ้นรอบดึงถัดไป · บิลค้างน้อยกว่า 10 ใบ = ยังไม่คิดคะแนน</span></td><td>บิลนับเป็นของ DC ที่ถืออยู่ตามสถานะปัจจุบัน (ต้นทาง: S O · ปัจจุบัน: T Q F X เคลียร์ · ปลายทาง: D P W N R) · Shop/DP รวมใน DC ต้นสังกัด</td></tr>
+</table></div>
+<div class="two">
+<div class="box"><b>คะแนน To Do รายงาน</b>ส่งตรงเวลา 100 · ส่งช้า 80 · ส่งย้อนหลัง 50 · ไม่ส่งหรือ QC ไม่ผ่าน 0 · ไม่นับวันหยุดของงานนั้น สาขาที่ยกเว้น และวันที่อยู่ในชีต EXEMPT</div>
+<div class="box"><b>คะแนนการส่งตารางกะ</b>ส่งแล้ว 100 · ร่าง 50 · ยังไม่กรอก 0</div>
+</div>
+<div class="box" style="margin-top:12px"><b>คะแนนการปิดเรื่อง NC</b>นับเคสสถานะ <b>“รอรับ”</b> (ออกเอกสารแล้ว รอพนักงานมารับ/เซ็น) · รวมเอกสาร NC และเอกสารหักเงินสินค้าเคลม · ไม่นับเอกสารที่ยกเลิก · นับวันจากวันที่เปลี่ยนเป็น “รอรับ” (ถ้าไม่มีบันทึก นับจากวันออกเอกสาร)<div class="f">คะแนน NC = เคสรอรับที่ยังไม่เกิน 7 วัน ÷ เคสรอรับทั้งหมด × 100 · ไม่มีเคสรอรับ = 100</div><span class="q">จำนวน NC ที่ถูกออกใหม่ (3 เดือนล่าสุด ต่อ 10 คน) แสดงเป็นข้อมูลเท่านั้น <b>ไม่นำมาคิดคะแนน</b> เพราะขึ้นกับความถี่ที่ทีมมาตรฐานเข้าตรวจแต่ละสาขา</span></div>
+<p class="q">ไม่มีมิติ “ประสิทธิภาพ” แยก เพราะซ้ำกับยอดขาย/ชิ้นต่อคน · ไม่นับตำแหน่ง DC Leader</p>
+</section>
+
+<section id="s4"><h2><span class="n">4</span>คะแนน Shop · 4 มิติ</h2>
+<p>แต่ละ Shop เทียบกับ <b>Shop ทั่วประเทศ</b> ใช้สูตรเปอร์เซ็นไทล์เดียวกัน · ไม่มีชิ้นต่อคน เพราะยอดปล่อยออกนับที่ DC</p>
+<div class="tw"><table>
+<tr><th style="width:130px">มิติ</th><th>วัดอะไร / สูตร</th></tr>
+<tr><td><b>1. ยอดขาย</b></td><td>ยอดขาย MTD เทียบเป้า <b>แบบเดียวกับ DC</b><div class="f">เป้าเดือน = ยอดขายเดือนก่อนของ Shop × 1.2 (ปรับตามจำนวนวัน) · เป้าถึงวันนี้ = เป้าเดือน × วันที่ผ่านไป ÷ วันในเดือน<br>% ของเป้า = ยอดขาย MTD ÷ เป้าถึงวันนี้</div><span class="q">ยอดราย Shop จากระบบยอดขาย (จับคู่ตามชื่อ Shop) · Shop ที่ไม่มียอดเดือนก่อน = ยังไม่คิดคะแนนยอดขาย</span></td></tr>
+<tr><td><b>2. ค่าใช้จ่าย</b></td><td>ค่าใช้จ่ายรวม % ของยอดขายของ Shop เอง (3 เดือนบัญชีล่าสุด) เทียบเกณฑ์ 25% · วิธีให้คะแนนเดียวกับ DC</td></tr>
+<tr><td><b>3. กำลังคน</b></td><td>% มาทำงานในตารางกะของ Shop · ไม่นับ พขร.</td></tr>
+<tr><td><b>4. To Do · วินัย</b></td><td>เฉลี่ยคะแนน To Do, สถานะการส่งตารางกะ และการปิดเรื่อง NC ของ Shop เอง</td></tr>
+</table></div>
+<p>หน้า DC มีตาราง <b>“Shop ในสังกัด”</b> แสดงคะแนนและอันดับของแต่ละร้าน แตะที่แถวเพื่อดูรายละเอียดของร้านนั้น</p>
+</section>
+
+<section id="s5"><h2><span class="n">5</span>กรณีข้อมูลขาด</h2>
+<div class="tw"><table>
+<tr><th style="width:200px">กรณี</th><th>ผล</th></tr>
+<tr><td><b>ไม่กรอกตารางกะ</b></td><td>มิติที่ใช้ตารางกะ (กำลังคน, ชิ้นต่อคน) = <b>0 คะแนน</b> และส่วนตารางกะในมิติวินัย = 0 · ป้ายแดง “ยังไม่กรอกตารางกะ”</td></tr>
+<tr><td><b>ไม่มีแผน (PA) ในเดือนนั้น</b></td><td>ไม่นำเดือนนั้นมาเทียบ</td></tr>
+<tr><td><b>แผนต่ำผิดปกติ</b></td><td>แผน ≤ 30% ของค่าเฉลี่ยจริงของสาขา ถือว่าแผนไม่สมบูรณ์ ไม่นำมาเทียบ</td></tr>
+<tr><td><b>ระบบยอดขาย / To Do / NC เชื่อมต่อไม่ได้</b></td><td>มิตินั้นไม่ถูกนำมาคิด (ไม่ใช่ 0) คะแนนรวมเฉลี่ยจากมิติที่เหลือ และขึ้นแถบเหลืองแจ้งด้านบน</td></tr>
+</table></div>
+</section>
+
+<section id="s6"><h2><span class="n">6</span>สีและระดับคะแนน</h2>
+<p><span class="chip ok">70 – 100 · ดีกว่ากลุ่ม</span> &nbsp; <span class="chip warn">30 – 69 · ใกล้ค่ากลาง / พอใช้</span> &nbsp; <span class="chip bad">0 – 29 · ต่ำกว่ากลุ่ม / ต้องปรับ</span> &nbsp; <span class="chip na">– · ไม่มีข้อมูล</span></p>
+<p class="q">แถบใต้แต่ละมิติ: ขีดดำ = ตำแหน่งของสาขา · ขีดเทา = ค่ากลางของกลุ่ม</p>
+</section>
+
+<section id="s7"><h2><span class="n">7</span>นิยามและแหล่งข้อมูล</h2>
+<ul>
+<li><b>ค่าใช้จ่ายดำเนินงาน</b> = ค่าใช้จ่ายของสาขาตามรหัสบัญชี <b>ไม่รวม</b> เงินเดือนและค่าจ้าง และต้นทุนเข้ารับ</li>
+<li><b>ค่าใช้จ่ายรวม (ใช้คิดคะแนน)</b> = ค่าใช้จ่ายดำเนินงาน + เงินเดือนและค่าจ้าง + ต้นทุนเข้ารับ · หน้าเว็บแสดงเฉพาะ % ไม่แสดงยอดเงินเดือนและต้นทุนเข้ารับ</li>
+<li><b>ยอดขาย MTD</b>: ระบบยอดขายรายวัน (AB + CC)</li>
+<li><b>ยอดขาย/ค่าใช้จ่ายบัญชี และแผน PA</b>: งบสาขารายเดือน (ไฟล์ P&amp;L) · ข้อมูลจริงถึงเดือนที่บัญชีปิดแล้ว</li>
+<li><b>กำลังคน, ชิ้นต่อคน, สถานะตารางกะ</b>: ระบบตารางกะ</li>
+<li><b>To Do</b>: ระบบ To Do รายวัน (รวมชีต EXEMPT)</li>
+<li><b>NC</b>: ระบบ NC ทีมมาตรฐาน (จับคู่สาขาจากชื่อ DC/Shop ในเอกสาร)</li>
+<li><b>บิล</b>: ระบบติดตามสถานะบิล (บิลค้าง/เกินอายุ ณ รอบดึงล่าสุด · getBillRank)</li>
+<li><b>กลุ่มขนาด</b>: ชีต M_Branch คอลัมน์ size</li>
+</ul>
+</section>
+<footer>NIM Express · แผนกคลังสินค้าและธุรการสาขา</footer>
+</main>
+<script>
+(function(){const API='https://script.google.com/macros/s/AKfycbwmm1cxLhewxKJte-chhualD7S_toTsbo7f2jAUDsj4H3yPstwvYYBwn9faiKhYsveJ/exec';
+const W0={DC:{sa:20,cv:20,att:15,ppd:15,dis:15,bill:15},Shop:{sa:30,cv:30,att:20,dis:20},DIS:{td:40,ro:30,nc:30}};
+const N={DC:[['sa','ยอดขาย','#1F3A5F'],['cv','ค่าใช้จ่าย','#B45309'],['att','กำลังคน','#0E8C9A'],['ppd','ชิ้นต่อคน','#2F6DB0'],['dis','วินัย','#1E8A5A'],['bill','บิล','#6D28D9']],
+ Shop:[['sa','ยอดขาย','#1F3A5F'],['cv','ค่าใช้จ่าย','#B45309'],['att','กำลังคน','#0E8C9A'],['dis','วินัย','#1E8A5A']],DIS:[['td','To Do','#1E8A5A'],['ro','ส่งตารางกะ','#7C5CC4'],['nc','ปิดเรื่อง NC','#C0392B']]};
+function draw(w,src){const box=document.getElementById('wBox'),T={DC:'DC · 6 มิติ',Shop:'Shop · 4 มิติ',DIS:'ภายในมิติวินัย'};
+ box.innerHTML=['DC','Shop','DIS'].map(k=>{const L=N[k].map(([x,n,c])=>[n,c,+((w[k]||{})[x]??W0[k][x])]),t=L.reduce((a,x)=>a+x[2],0)||1;
+  return`<div class="box"${k==='DIS'?' style="grid-column:1/-1"':''}><b>${T[k]}</b><div style="display:flex;height:18px;border-radius:9px;overflow:hidden;gap:2px;margin:6px 0 8px">${L.map(([n,c,v])=>v?`<i title="${n}" style="width:${v/t*100}%;background:${c};color:#fff;font-size:11px;font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center">${Math.round(v/t*100)}%</i>`:'').join('')}</div>
+  <table><tr><th>มิติ</th><th style="text-align:right">น้ำหนัก</th><th style="text-align:right">สัดส่วน</th></tr>${L.map(([n,c,v])=>`<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${c};margin-right:6px"></span>${n}</td><td style="text-align:right">${v}</td><td style="text-align:right"><b>${Math.round(v/t*100)}%</b></td></tr>`).join('')}</table></div>`}).join('');
+ document.getElementById('wSrc').textContent='ที่มา: '+src}
+draw(W0,'ค่าตั้งต้น (กำลังโหลดจาก Google Sheet…)');
+const cb='pw'+Date.now(),s=document.createElement('script');const t=setTimeout(()=>{draw(W0,'ค่าตั้งต้น (โหลดจาก Google Sheet ไม่ได้)')},15000);
+window[cb]=d=>{clearTimeout(t);if(d&&d.w)draw(d.w,d.src||'Google Sheet · M_PerfWeight');else draw(W0,'ค่าตั้งต้น')};s.onerror=()=>{clearTimeout(t);draw(W0,'ค่าตั้งต้น (โหลดจาก Google Sheet ไม่ได้)')};
+s.src=API+'?action=perfcfg&callback='+cb;document.body.appendChild(s)})();
+</script>
+</body>
+</html>
