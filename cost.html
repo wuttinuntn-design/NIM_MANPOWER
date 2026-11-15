@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ต้นทุนสาขา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* โทนเดียวกับ branch_perf.html / branch_sales.html */
+:root{--bg:#fff;--line:#E7EAEF;--line2:#F2F4F7;--ink:#141B26;--ink2:#5A6577;--ink3:#98A1AF;--brand:#1F3A5F;--brandSoft:#EEF2F7;
+  --ok:#1E8A5A;--okSoft:#E3F4EA;--warn:#D97706;--warnSoft:#FBF1D6;--bad:#C0392B;--badSoft:#FBE3E0;--r:16px;--sh:0 1px 2px rgba(20,27,38,.04),0 2px 8px rgba(20,27,38,.04)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:'IBM Plex Sans Thai',system-ui,sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit;color:inherit}
+.q{color:var(--ink3)}.num{font-variant-numeric:tabular-nums}.hidden{display:none!important}
+.ic{display:inline-block;vertical-align:-3px;flex:none}
+.up{color:var(--ok)}.dn{color:var(--bad)}
+main{max-width:1280px;margin:0 auto;padding:16px 20px 40px}
+body.embed main{padding-top:6px}
+.sp{flex:1}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.bar .lb{font-size:12.5px;color:var(--ink3);display:inline-flex;align-items:center;gap:5px}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{border:0;background:none;border-radius:9px;padding:7px 14px;min-height:38px;font-weight:600;font-size:14px;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.seg button:hover{background:var(--line2);color:var(--ink)}
+.seg button.on,.seg button.on:hover{background:var(--brand);color:#fff}
+.seg.sm button{padding:5px 12px;min-height:34px;font-size:13px}
+.sel{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;min-height:38px;font-size:14px;max-width:100%}
+.ibtn{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn:hover,.ibtn:hover{background:var(--brandSoft)}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);cursor:pointer;font-weight:400}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;background:#fff;box-shadow:var(--sh);min-width:0;margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3 .q{font-weight:400;font-size:12.5px}
+.card h3.mt{margin-top:18px}
+.grid{display:grid;gap:16px;align-items:start}.grid>.card{margin-bottom:16px}
+.g-prof{grid-template-columns:1.55fr 1fr}
+.bn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.bn .nm{font-size:22px;font-weight:700;margin-right:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip.sm{font-size:11.5px;padding:1px 8px}
+.c-ok{background:var(--okSoft);color:var(--ok)}.c-warn{background:var(--warnSoft);color:var(--warn)}.c-bad{background:var(--badSoft);color:var(--bad)}.c-na{background:var(--line2);color:var(--ink2)}
+.prof{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.prof div{background:#F7F9FB;border-radius:12px;padding:10px 12px;min-width:0}
+.prof span{font-size:12px;color:var(--ink2);display:block}
+.prof b{display:block;font-size:20px;line-height:1.3;margin:2px 0}
+.prof em{font-style:normal;font-size:12px;color:var(--ink3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chart{width:100%;height:auto;display:block}
+.chart .mo{font-size:11px;fill:#98A1AF}.chart .mo.cur{fill:#141B26;font-weight:600}.chart .pc{font-size:10.5px;font-weight:600}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:6px}.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ins{display:grid;gap:8px}
+.ins div{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;padding:8px 10px;border-radius:10px;background:#F7F9FB}
+.ins .g{color:var(--ok)}.ins .r{color:var(--bad)}.ins b{color:var(--ink)}
+.top5 .it{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.top5 .it:last-child{border-bottom:0}
+.top5 .nm{min-width:0}.top5 .nm b{display:block;font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top5 .nm small{display:block;color:var(--ink3);font-size:12px}
+.top5 .tr{height:6px;background:var(--line2);border-radius:3px;margin-top:5px;overflow:hidden}.top5 .tr i{display:block;height:100%;background:var(--bad);border-radius:3px}
+.top5 .val{font-weight:700;color:var(--bad);font-size:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.dim{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;box-shadow:var(--sh);display:flex;flex-direction:column;gap:4px;border-top:4px solid var(--c,#1F3A5F)}
+.dim .h{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink2)}
+.dim .v{font-size:24px;font-weight:700;line-height:1.2}.dim .v small{font-size:13px;color:var(--ink3);font-weight:500}
+.dim .m{font-size:12px;color:var(--ink3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tw{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:72vh}
+table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+.t th,.t td{padding:7px 9px;border-bottom:1px solid var(--line2);text-align:right;white-space:nowrap}
+.t th{position:sticky;top:0;z-index:2;background:#F7F9FB;color:var(--ink2);font-weight:600;font-size:12px;border-bottom:1px solid var(--line)}
+.t thead tr.r2 th{top:31px}
+.t .l{text-align:left}.t .c{text-align:center}
+.t .stk{position:sticky;left:0;z-index:1;background:#fff;max-width:290px;overflow:hidden;text-overflow:ellipsis}
+.t th.stk{z-index:3;background:#F7F9FB}
+.t td.stk small{display:block;color:var(--ink3);font-size:11px;line-height:1.2}
+.t .pa{color:var(--ink3)}.t .z{color:#C9CED6}.t td.fut{color:#B8C0CC}
+.t .p0{border-left:1px solid var(--line)}
+.t .s{background:#FAFBFC}.t th.s{background:#F2F4F7}
+.t .cur{background:#FFFBEB}.t th.cur{background:#FDF3D3;color:var(--ink)}
+.t .tg{font-style:normal;font-size:10.5px;font-weight:500;color:var(--ink3);background:var(--line2);border-radius:6px;padding:0 5px;margin-left:4px}
+.t tr.gh td{background:#fff;color:var(--brand);font-weight:700;font-size:12.5px;padding-top:14px;border-bottom:1px solid var(--line)}
+.t tr.tot td{font-weight:700;background:#F7F9FB;border-top:1px solid var(--line)}
+.t tr.tot td.stk{background:#F7F9FB}
+.t tr.rp td{border-bottom:0}.t td.kd{text-align:left;color:var(--ink3);font-size:11.5px}
+.t tr.cnt td{color:var(--ink3);font-size:12px}
+.t tbody tr:hover td{background:#F5F8FC}.t tbody tr:hover td.stk{background:#F5F8FC}
+.t th.sort{cursor:pointer;user-select:none}.t th.sort:hover{color:var(--ink)}
+.t tr.go{cursor:pointer}
+.note{font-size:12px;color:var(--ink3);line-height:1.7;margin-top:10px}
+.empty{color:var(--ink3);font-size:13.5px;padding:6px 0}
+.ld{padding:60px 0;text-align:center;color:var(--ink3)}
+@media(max-width:1000px){.g-prof{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){main{padding:10px 12px 30px}.prof{grid-template-columns:repeat(2,1fr)}.chart .pc{display:none}.bn .nm{font-size:19px}.seg.sm button{padding:5px 9px}}
+@media(pointer:coarse){.seg button,.seg.sm button{min-height:42px}.sel{min-height:42px}}
+</style>
+</head>
+<body>
+<main id="app"><div class="ld">กำลังโหลดข้อมูลต้นทุน…</div></main>
+<script>
+'use strict';
+const QS=new URLSearchParams(location.search);
+const EMBED=QS.get('embed')==='1'; if(EMBED) document.body.classList.add('embed');
+const LOCK=QS.get('lock')==='1';            // ลิงก์ของสาขา: ดูได้เฉพาะสาขาตัวเอง
+const TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const MASK='•••';
+let D=null,ROWS=[],SAL=0,NACT=0,ALL=[...Array(12).keys()];
+const st={br:QS.get('br')||'',ug:'all',lay:'act',nz:true,over:false,withShop:false,
+  ov:{rg:'',t:'',q:'',over:false,sort:'dp',dir:-1}};
+try{const s=JSON.parse(localStorage.getItem('cost_ui')||'{}');['ug','lay','nz','withShop'].forEach(k=>{if(k in s)st[k]=s[k]})}catch(e){}
+const save=()=>{try{localStorage.setItem('cost_ui',JSON.stringify({ug:st.ug,lay:st.lay,nz:st.nz,withShop:st.withShop}))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nf=new Intl.NumberFormat('th-TH',{maximumFractionDigits:0});
+const nf1=new Intl.NumberFormat('th-TH',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fB=v=>v===null||v===undefined?'–':nf.format(Math.round(v));
+const fP=v=>v===null||v===undefined||!isFinite(v)?'–':Math.abs(v)<0.0005?'0.0%':(v>0?'+':'')+nf1.format(v*100)+'%';
+const fR=v=>v===null||v===undefined||!isFinite(v)?'–':nf1.format(v*100)+'%';
+const fD=v=>v===null||v===undefined?'–':Math.abs(v)<0.5?'0':(v>0?'+':'−')+nf.format(Math.abs(Math.round(v)));
+
+/* ---------- ข้อมูล ---------- */
+function part(b){ if(st.ug==='all'||!b.G) return st.ug==='all'?b:null; return b.G[st.ug]||null; }
+/* รวมหลายสาขา → entry เดียว · แต่ละเดือนเทียบเฉพาะสาขาที่มีแผนเดือนนั้น */
+function agg(list){
+  const E={v:{},p:{},pm:Array(12).fill(0),s:Array(12).fill(null),ps:Array(12).fill(null),n:Array(12).fill(0),nAll:list.length,na:Math.min(...list.map(b=>{const x=part(b);return x?x.na:NACT}))};
+  const add=(o,j,m,x)=>{ if(x===null||x===undefined) return; (o[j]||(o[j]=Array(12).fill(null)))[m]=((o[j][m])||0)+x; };
+  list.forEach(b0=>{ const b=part(b0); if(!b) return;
+    for(const m of ALL){ const has=b.pm[m]===1;
+      if(has){E.pm[m]=1;E.n[m]++;}
+      for(const j in b.v){ const a=b.v[j][m], p=b.p[j]?b.p[j][m]:null;
+        if(has){ add(E.p,j,m,p===null?(+j===SAL?null:0):p); add(E.v,j,m,a); } }
+      if(has&&b.ps[m]!==null){ E.ps[m]=(E.ps[m]||0)+b.ps[m]; E.s[m]=(E.s[m]||0)+(b.s[m]||0); }
+    }
+  });
+  // เดือนที่ไม่มีสาขาไหนมีแผน: แสดงยอดจริงรวมทุกสาขา (ไม่เทียบ)
+  for(const m of ALL){ if(E.pm[m]) continue;
+    list.forEach(b0=>{ const b=part(b0); if(!b) return; for(const j in b.v) add(E.v,j,m,b.v[j][m]); if(b.s[m]!==null&&m<E.na) E.s[m]=(E.s[m]||0)+(b.s[m]||0); }); }
+  for(const j in E.v) if(!E.p[j]) E.p[j]=Array(12).fill(null);
+  return E;
+}
+function single(b0){ const b=part(b0); if(!b) return null;
+  const E={v:b.v,p:{},pm:b.pm,s:b.s,ps:b.ps,n:b.pm.slice(),nAll:1,na:b.na??NACT};
+  for(const j in b.v) E.p[j]=b.p[j].map((x,m)=>b.pm[m]?(x===null&&+j!==SAL?0:x):null);
+  return E; }
+let NA=12;const acts=m=>m<NA;
+/* ค่าใช้จ่ายดำเนินงาน (ไม่รวมเงินเดือน) */
+function op(E,m,w){ let s=0,any=false; for(const j in E[w]){ if(+j===SAL) continue; const x=E[w][j][m]; if(x!==null&&x!==undefined){s+=x;any=true;} } return w==='p'&&!E.pm[m]?null:(any||w==='p'?s:0); }
+function sal(E,m,w){ const r=E[w][SAL]; return r?r[m]:null; }
+function months(E){ return ALL.filter(m=>acts(m)&&E.pm[m]); }
+function sumM(E,ms,f){ return ms.reduce((a,m)=>a+(f(m)||0),0); }
+/* % ค่าใช้จ่ายดำเนินงานต่อยอดขาย (ไม่รวมเงินเดือน / ต้นทุนเข้ารับ) */
+function ratio(E,m,w){ const c=op(E,m,w), s=w==='p'?E.ps[m]:E.s[m]; if(c===null||!s) return null; return c/s; }
+
+/* ---------- เริ่มต้น ---------- */
+fetch('cost_data.json?v='+Date.now().toString(36)).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+  D=d; ROWS=d.rows; SAL=ROWS.findIndex(r=>r.sal); NACT=d.nact;
+  if(st.br&&!D.br[st.br]) st.br='';
+  render();
+  if(EMBED) try{parent.postMessage({type:'cost:ready'},'*')}catch(e){}
+}).catch(e=>{$('app').innerHTML='<div class="ld">โหลดข้อมูลไม่ได้ ('+esc(e.message)+') · ตรวจว่ามีไฟล์ cost_data.json อยู่โฟลเดอร์เดียวกัน</div>'});
+addEventListener('message',e=>{const d=e.data||{}; if(d.type==='cost:ctx'&&D){ const b=String(d.br||''); if(b!==st.br){st.br=D.br[b]?b:''; render();} }});
+
+
+/* แถวของตาราง */
+function tRows(E){
+  const ms=months(E);
+  const mk=(name,code,kind,cells,o={})=>{ const yM=ms.filter(m=>cells[m].pa!==null&&cells[m].pa!==undefined);
+    const yP=yM.reduce((a,m)=>a+cells[m].pa,0), yA=yM.reduce((a,m)=>a+(cells[m].ac||0),0), fy=ALL.reduce((a,m)=>a+(cells[m].pa||0),0);
+    return {name,code,kind,cells,yP,yA,yN:yM.length,fy,empty:cells.every(c=>!c.pa&&!c.ac),over:o.inv?yA<yP-0.5:yA>yP+0.5,...o}; };
+  const R=[];
+  R.push({h:'ยอดขาย'});
+  R.push(mk('ยอดขายรวม','','g',ALL.map(m=>({pa:E.pm[m]?E.ps[m]:null,ac:acts(m)?E.s[m]:null,n:E.n[m]})),{inv:true}));
+  R.push({h:'ค่าใช้จ่ายดำเนินงาน'});
+  Object.keys(E.v).map(Number).filter(j=>j!==SAL).sort((a,b)=>String(ROWS[a].c).localeCompare(String(ROWS[b].c))).forEach(j=>
+    R.push(mk(ROWS[j].l,ROWS[j].c,'a',ALL.map(m=>({pa:E.p[j][m],ac:acts(m)?(E.v[j][m]||0):null,n:E.n[m]})))));
+  R.push(mk('รวมค่าใช้จ่ายดำเนินงาน','','tot',ALL.map(m=>({pa:op(E,m,'p'),ac:acts(m)?op(E,m,'v'):null,n:E.n[m]}))));
+  const rc=ALL.map(m=>({pa:E.pm[m]?ratio(E,m,'p'):null,ac:acts(m)?ratio(E,m,'v'):null}));
+  let a=0,p=0,sa=0,sp=0,k=0; ms.forEach(m=>{if(!E.ps[m]) return; k++; a+=op(E,m,'v'); p+=op(E,m,'p'); sa+=E.s[m]||0; sp+=E.ps[m];});
+  R.push({name:'% ค่าใช้จ่ายดำเนินงานต่อยอดขาย',code:'',kind:'tot',cells:rc,pct:true,yP:sp?p/sp:null,yA:sa?a/sa:null,yN:k,fy:null,empty:false,over:sa&&sp&&a/sa>p/sp});
+  return R;
+}
+function csv(E,name){
+  const R=tRows(E).filter(r=>!r.h), q=x=>'"'+String(x).replace(/"/g,'""')+'"';
+  const num=(v,r)=>v===null||v===undefined?'':r.pct?(v*100).toFixed(2):r.mask?'':Math.round(v);
+  const L=[['รหัส','รายการ',...ALL.flatMap(m=>[TH[m]+' แผน',TH[m]+' จริง']),'สะสม แผน','สะสม จริง','ต่าง','ทั้งปี แผน'].map(q).join(',')];
+  R.forEach(r=>L.push([q(r.code),q(r.name),...ALL.flatMap(m=>[num(r.cells[m].pa,r),acts(m)?num(r.cells[m].ac,r):'']),num(r.yN?r.yP:null,r),num(r.yA,r),r.yN&&!r.mask&&r.yA!==null?(r.pct?((r.yA-r.yP)*100).toFixed(2):Math.round(r.yA-r.yP)):'',r.pct?'':num(r.fy,r)].join(',')));
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'}));
+  a.download=`ต้นทุน_${name.replace(/[\\/:*?"<>|]/g,'_')}_${D.asof}.csv`; document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+
+
+function render(){ if(st.br) renderBranch(); else renderOverview(); }
+function kids(code){ return Object.keys(D.br).filter(k=>D.br[k].par===code); }
+const IC={
+  wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M7 15v3M11 11v7M15 13v5M19 8v10"/>',
+  alert:'<path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/>',
+  table:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',
+  up:'<path d="M3 17l6-6 4 4 8-8"/><path d="M21 13V7h-6"/>',down:'<path d="M3 7l6 6 4-4 8 8"/><path d="M21 11v6h-6"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/>',
+  pct:'<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',dl:'<path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3h16v-3"/>',
+  back:'<path d="m15 18-6-6 6-6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'};
+const ic=(n,s=16)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[n]||''}</svg>`;
+const segH=(id,items,cur,cls='')=>`<div class="seg ${cls}" id="${id}">${items.map(([k,l])=>`<button data-k="${k}" class="${String(cur)===String(k)?'on':''}">${l}</button>`).join('')}</div>`;
+const chipPct=(v,inv)=>v===null||v===undefined||!isFinite(v)?'<span class="chip c-na">–</span>':`<span class="chip ${(inv?v<-0.0005:v>0.0005)?'c-bad':'c-ok'}">${fP(v)}</span>`;
+const badA=(a,p,inv)=>a===null||p===null||a===undefined||p===undefined?null:(inv?a<p-Math.max(0.5,Math.abs(p)*0.0005):a>p+0.5);
+const tone=(a,p,inv)=>{const x=badA(a,p,inv);return x===null?'':x?'dn':'up'};
+
+/* ---------- หน้าสาขา ---------- */
+function renderBranch(){
+  const b=D.br[st.br], ks=kids(st.br), withShop=st.withShop&&ks.length>0;
+  const list=withShop?[b,...ks.map(k=>D.br[k])]:[b];
+  const E=list.length>1?agg(list):single(b);
+  let h=`<div class="bar">`+(!EMBED?`<button class="ibtn" id="bBack" title="ทุกสาขา">${ic('back',18)}</button><select class="sel" id="brSel">${brOptions()}</select>`:'')+
+    (ks.length?segH('shSeg',[['0','เฉพาะสาขานี้'],['1',`รวม Shop ในสังกัด (${ks.length})`]],withShop?'1':'0','sm'):'')+
+    segH('ugSeg',[['all','รวม AB+CC'],['AB','AB'],['CC','CC']],st.ug,'sm')+
+    `<span class="sp"></span><span class="lb">${ic('cal',14)} ข้อมูลจริงถึง ${esc(D.asof)}</span></div>`;
+  if(!E){ $('app').innerHTML=h+`<div class="card empty">สาขานี้ยังไม่มีข้อมูลแยกงาน ${st.ug}</div>`; bindBranch(); return; }
+  NA=E.na; const ms=months(E), last=[...ms].pop(), has=last!==undefined;
+  const oA=sumM(E,ms,m=>op(E,m,'v')), oP=sumM(E,ms,m=>op(E,m,'p'));
+  const lA=has?op(E,last,'v'):null, lP=has?op(E,last,'p'):null;
+  let rA=0,rP=0,sA=0,sP=0,rN=0; ms.forEach(m=>{if(!E.ps[m]) return; rN++; rA+=op(E,m,'v'); rP+=op(E,m,'p'); sA+=E.s[m]||0; sP+=E.ps[m];});
+  let run=0; for(let i=ms.length-1;i>=0;i--){ const m=ms[i]; if(op(E,m,'v')>op(E,m,'p')+0.5) run++; else break; }
+  const over=oA>oP+0.5;
+  const stChip=!ms.length?'<span class="chip c-na">ยังไม่มีเดือนที่มีแผน</span>':run>=2?`<span class="chip c-bad">${ic('alert',13)} เกินแผน ${run} เดือนติด</span>`:over?'<span class="chip c-warn">สะสมเกินแผน</span>':'<span class="chip c-ok">'+ic('check',13)+' อยู่ในแผน</span>';
+  const tile=(lab,val,sub,cls='')=>`<div><span>${lab}</span><b class="num ${cls}">${val}</b><em>${sub}</em></div>`;
+  // กราฟรายเดือน (SVG)
+  const W=640,H=190,pl=6,pr=6,pt=22,pb=24,cw=(W-pl-pr)/12,mx=Math.max(1,...ALL.map(m=>Math.max(acts(m)?op(E,m,'v')||0:0,op(E,m,'p')||0)))*1.08;
+  const y=v=>pt+(H-pt-pb)*(1-v/mx);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart" role="img" aria-label="ค่าใช้จ่ายดำเนินงานรายเดือนเทียบแผน">`;
+  for(const m of ALL){ const x=pl+cw*m, a=acts(m)?op(E,m,'v'):null, p=op(E,m,'p'), bw=cw*0.32, bad=badA(a,p);
+    if(p!==null) svg+=`<rect x="${x+cw*0.16}" y="${y(p)}" width="${bw}" height="${H-pb-y(p)}" rx="3" fill="#E3E7EC"><title>${TH[m]} แผน ${fB(p)}</title></rect>`;
+    if(a!==null) svg+=`<rect x="${x+cw*0.16+bw+2}" y="${y(a)}" width="${bw}" height="${H-pb-y(a)}" rx="3" fill="${p===null?'#B8C0CC':bad?'#C0392B':'#1F3A5F'}"><title>${TH[m]} จริง ${fB(a)}${p!==null?' · แผน '+fB(p)+' · '+fP(p?a/p-1:null):' · ไม่มีแผน'}</title></rect>`;
+    if(a!==null&&p) svg+=`<text x="${x+cw/2}" y="${Math.min(y(a),y(p))-6}" text-anchor="middle" class="pc" fill="${bad?'#C0392B':'#1E8A5A'}">${fP(a/p-1)}</text>`;
+    svg+=`<text x="${x+cw/2}" y="${H-6}" text-anchor="middle" class="mo${m===last?' cur':''}">${TH[m]}</text>`; }
+  svg+=`<line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="#E7EAEF"/></svg>`;
+  // สิ่งที่ต้องดู
+  const tops=Object.keys(E.v).filter(j=>+j!==SAL).map(j=>{ const a=sumM(E,ms,m=>E.v[j][m]), p=sumM(E,ms,m=>E.p[j][m]); return {j,a,p,d:a-p}; }).filter(x=>x.d>0.5).sort((x,y)=>y.d-x.d).slice(0,5);
+  const ins=[];
+  if(has) ins.push([badA(lA,lP)?'r':'g',`${TH[last]} ค่าใช้จ่ายดำเนินงาน <b>${fB(lA)}</b> ${badA(lA,lP)?'เกิน':'ต่ำกว่า'}แผน <b>${fP(lP?Math.abs(lA/lP-1):null).replace('+','')}</b>`]);
+  if(ms.length) ins.push([over?'r':'g',`สะสม ${ms.length} เดือน ${over?'เกินแผน':'ต่ำกว่าแผน'} <b>${fD(Math.abs(oA-oP)).replace('+','')}</b> บาท`+(over&&tops[0]?` ส่วนใหญ่จาก <b>${esc(ROWS[tops[0].j].l)}</b>`:'')]);
+  if(run>=2) ins.push(['r',`เกินแผน <b>${run} เดือนติด</b> ต้องส่งแผนแก้ไขภายใน 7 วัน`]);
+  if(rN&&sP) ins.push([sA<sP*0.9995?'r':'g',`ยอดขายสะสม${sA<sP?'ต่ำกว่า':'สูงกว่า'}แผน <b>${fP(Math.abs(sA/sP-1)).replace('+','')}</b> · % ค่าใช้จ่ายดำเนินงานต่อยอดขาย <b>${fR(rA/sA)}</b> (แผน ${fR(rP/sP)})`]);
+  const tmx=tops.length?tops[0].d:1;
+  h+=`<div class="grid g-prof">
+  <div class="card">
+    <div class="bn"><span class="nm">${esc(b.n)}</span><span class="chip c-na">${esc(b.t)}</span><span class="chip c-na">${esc(b.rg)}</span>${withShop?`<span class="chip c-na">+ Shop ${ks.length} ร้าน</span>`:''}${st.ug!=='all'?`<span class="chip c-na">งาน ${st.ug}</span>`:''}${stChip}</div>
+    <div class="prof">
+      ${tile(`ค่าใช้จ่ายดำเนินงาน ${has?TH[last]:''}`,fB(lA),has?`แผน ${fB(lP)} ${chipPct(lP?lA/lP-1:null)}`:'–',tone(lA,lP))}
+      ${tile(`สะสม ${ms.length?TH[ms[0]]+'–'+TH[last]:''}`,fB(oA),ms.length?`แผน ${fB(oP)} ${chipPct(oP?oA/oP-1:null)}`:'–',tone(oA,oP))}
+      ${tile('% ค่าใช้จ่ายดำเนินงาน/ยอดขาย',rN&&sA?fR(rA/sA):'–',rN?`แผน ${fR(rP/sP)}`:'ไม่มีแผน',rN&&sA&&sP?(rA/sA>rP/sP+0.0005?'dn':'up'):'')}
+      ${tile('ยอดขายสะสม',rN?fB(sA):'–',rN?`แผน ${fB(sP)} ${chipPct(sP?sA/sP-1:null,true)}`:'–',rN?tone(sA,sP,true):'')}
+    </div>
+    <h3 class="mt">${ic('chart')} ค่าใช้จ่ายดำเนินงานรายเดือน เทียบแผน <span class="q">ไม่รวมเงินเดือน / ต้นทุนเข้ารับ</span></h3>
+    ${svg}
+    <div class="lg"><span><i style="background:#E3E7EC"></i>แผน (PA)</span><span><i style="background:#1F3A5F"></i>จริง ไม่เกินแผน</span><span><i style="background:#C0392B"></i>จริง เกินแผน</span><span><i style="background:#B8C0CC"></i>จริง (เดือนที่ไม่มีแผน)</span></div>
+  </div>
+  <div class="card">
+    <h3>${ic('alert')} สิ่งที่ต้องดู</h3>
+    <div class="ins">${ins.length?ins.map(([c,t])=>`<div><span class="${c}">${ic(c==='r'?'up':'check')}</span><span>${t}</span></div>`).join(''):'<div class="empty">ยังไม่มีเดือนที่มีแผนให้เทียบ</div>'}</div>
+    <h3 class="mt">${ic('up')} รายการที่เกินแผนมากสุด <span class="q">สะสม</span></h3>
+    <div class="top5">${tops.length?tops.map(x=>`<div class="it"><div class="nm"><b>${esc(ROWS[x.j].l)}</b><small>จริง ${fB(x.a)} · แผน ${fB(x.p)}</small><div class="tr"><i style="width:${Math.max(3,x.d/tmx*100)}%"></i></div></div><div class="val num">+${nf.format(Math.round(x.d))}</div></div>`).join(''):'<div class="empty">ไม่มีรายการที่เกินแผน</div>'}</div>
+  </div></div>
+  <div class="card">
+    <h3>${ic('table')} แผน (PA) เทียบจริง รายรหัสบัญชี <span class="sp"></span>
+      ${segH('laySeg',[['act','จริง (สีเทียบแผน)'],['row','แผน / จริง / ต่าง'],['pair','แผน | จริง คู่กัน']],st.lay,'sm')}
+      <label class="chk"><input type="checkbox" id="cNz" ${st.nz?'checked':''}> ซ่อนรหัสที่ไม่มีตัวเลข</label>
+      <label class="chk"><input type="checkbox" id="cOv" ${st.over?'checked':''}> เฉพาะที่เกินแผน</label>
+      <button class="btn" id="bCsv">${ic('dl',15)} CSV</button></h3>
+    <div class="tw"><table class="t" id="tb">${table(E,list.length>1)}</table></div>
+    <div class="note">แผน (PA) = งบรายเดือนในระบบบัญชี · จริง = ยอดที่ฝ่ายบัญชีแจ้ง · <b class="dn">แดง</b> เกินแผน · <b class="up">เขียว</b> ไม่เกินแผน · – = เดือนที่ยังไม่ได้ตั้งแผน (ไม่นำมาเทียบ) · สะสม = รวมเฉพาะเดือนที่มีแผน · คิดเฉพาะค่าใช้จ่ายดำเนินงานตามรหัสบัญชี ไม่รวมเงินเดือนและต้นทุนเข้ารับ${E.na<NACT?` · <b>แยกงาน AB/CC มีตัวเลขจริงถึง ${TH[E.na-1]}</b> เดือนหลังจากนั้นดูได้ที่ "รวม AB+CC"`:''}${list.length>1?' · รวมหลายสาขา: แต่ละเดือนรวมเฉพาะสาขาที่มีแผนเดือนนั้น':''}</div>
+  </div>`;
+  $('app').innerHTML=h; bindBranch(E,list.length>1,b.n+(withShop?' รวม Shop':'')+(st.ug==='all'?'':' '+st.ug));
+}
+function bindBranch(E,multi,name){
+  const on=(id,f)=>{const x=$(id); if(x) x.onclick=e=>{const t=e.target.closest('[data-k]'); if(t) f(t.dataset.k)}};
+  on('ugSeg',k=>{st.ug=k;save();render()}); on('shSeg',k=>{st.withShop=k==='1';save();render()});
+  on('laySeg',k=>{st.lay=k;save();document.querySelectorAll('#laySeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));$('tb').innerHTML=table(E,multi)});
+  if($('bBack')) $('bBack').onclick=()=>{st.br='';render();scrollTo(0,0)};
+  if($('brSel')) $('brSel').onchange=e=>{st.br=e.target.value;render()};
+  if(!E) return;
+  $('cNz').onchange=e=>{st.nz=e.target.checked;save();$('tb').innerHTML=table(E,multi)};
+  $('cOv').onchange=e=>{st.over=e.target.checked;$('tb').innerHTML=table(E,multi)};
+  $('bCsv').onclick=()=>csv(E,name);
+}
+function brOptions(){ const L=Object.entries(D.br).sort((a,b)=>a[1].n.localeCompare(b[1].n,'th'));
+  return ['DC','Shop'].map(t=>`<optgroup label="${t}">${L.filter(([,b])=>t==='Shop'?b.t==='Shop':b.t!=='Shop').map(([k,b])=>`<option value="${k}" ${k===st.br?'selected':''}>${k} ${esc(b.n)}</option>`).join('')}</optgroup>`).join(''); }
+
+/* ตาราง: act = ตัวเลขจริงสีเทียบแผน · row = แผน/จริง/ต่าง · pair = คู่กัน */
+function table(E,multi){
+  const R=tRows(E).filter(r=>r.h||r.kind!=='a'||((!st.nz||!r.empty)&&(!st.over||r.over)));
+  const fv=(v,r)=>v===null||v===undefined?'–':r.pct?fR(v):r.mask?(v?MASK:'0'):Math.abs(v)<0.5?'<span class="z">0</span>':fB(v);
+  const fd=(d,r)=>d===null?'–':r.pct?(d>0?'+':'')+nf1.format(d*100)+' จุด':r.mask?MASK:fD(d);
+  const cl=(r,pa,ac)=>{ if(pa===null||pa===undefined||ac===null||ac===undefined||r.mask) return ''; if(!pa&&!ac) return ''; return (r.inv?ac<pa-Math.max(0.5,Math.abs(pa)*0.0005):ac>pa+(r.pct?0:0.5))?'dn':'up'; };
+  const pc=r=>r.yN&&r.yP&&!r.pct&&!r.mask?fP(r.yA/r.yP-1):'';
+  const lab=r=>`${esc(r.name)}${r.code?`<small>${esc(r.code)}</small>`:''}`;
+  const last=NA-1, sc=m=>m===last?' cur':'', lastAct=TH[NA-1];
+  const tip=(r,x)=>r.mask||r.pct?'':` title="แผน ${x.pa===null||x.pa===undefined?'–':fB(x.pa)} · จริง ${fB(x.ac)}${x.pa&&x.ac!==null?' · '+fP(x.ac/x.pa-1):''}${multi&&x.n?' · '+x.n+' สาขามีแผน':''}"`;
+  const sumCols=r=>{const yp=r.yN?r.yP:null,c=cl(r,yp,r.yA);return `<td class="p0 s num pa">${fv(yp,r)}</td><td class="s num ${c}">${fv(r.yA,r)}</td><td class="s num ${c}">${r.yN?fd(r.yA-r.yP,r):'–'}</td><td class="s num ${c}">${pc(r)}</td><td class="p0 s num pa">${r.pct?'':fv(r.fy,r)}</td>`};
+  const sumHead=`<th class="p0 s">แผน สะสม</th><th class="s">จริง สะสม</th><th class="s">ต่าง</th><th class="s">%</th><th class="p0 s">แผนทั้งปี</th>`;
+  let h='', nc=0;
+  if(st.lay==='act'){
+    nc=12+5;
+    h=`<thead><tr><th class="l stk">รายการ</th>${ALL.map(m=>`<th class="${sc(m).trim()}">${TH[m]}${acts(m)?'':'<i class="tg">แผน</i>'}</th>`).join('')}${sumHead}</tr></thead><tbody>`;
+    R.forEach(r=>{ if(r.h){h+=`<tr class="gh"><td class="l stk">${r.h}</td><td colspan="${nc}"></td></tr>`;return;}
+      h+=`<tr class="${r.kind==='tot'?'tot':''}"><td class="l stk">${lab(r)}</td>${ALL.map(m=>{const x=r.cells[m]; return acts(m)?`<td class="num ${cl(r,x.pa,x.ac)}${sc(m)}"${tip(r,x)}>${fv(x.ac,r)}</td>`:`<td class="num pa fut">${fv(x.pa,r)}</td>`}).join('')}${sumCols(r)}</tr>`; });
+  } else if(st.lay==='pair'){
+    nc=12*2+5;
+    h=`<thead><tr><th class="l stk" rowspan="2">รายการ</th>${ALL.map(m=>`<th class="p0 c${sc(m)}" colspan="2">${TH[m]}${acts(m)?'':'<i class="tg">ยังไม่มีจริง</i>'}</th>`).join('')}<th class="p0 s c" colspan="4">สะสม ม.ค.–${lastAct}</th><th class="p0 s">ทั้งปี</th></tr>
+      <tr class="r2">${ALL.map(m=>`<th class="p0${sc(m)}">แผน</th><th class="${sc(m).trim()}">จริง</th>`).join('')}<th class="p0 s">แผน</th><th class="s">จริง</th><th class="s">ต่าง</th><th class="s">%</th><th class="p0 s">แผน</th></tr></thead><tbody>`;
+    R.forEach(r=>{ if(r.h){h+=`<tr class="gh"><td class="l stk">${r.h}</td><td colspan="${nc}"></td></tr>`;return;}
+      h+=`<tr class="${r.kind==='tot'?'tot':''}"><td class="l stk">${lab(r)}</td>${ALL.map(m=>{const x=r.cells[m];
+        return `<td class="p0 pa num${sc(m)}">${fv(x.pa,r)}</td><td class="num${sc(m)} ${acts(m)?cl(r,x.pa,x.ac):'fut'}">${acts(m)?fv(x.ac,r):'·'}</td>`}).join('')}${sumCols(r)}</tr>`; });
+  } else {
+    nc=12+6;
+    h=`<thead><tr><th class="l stk">รายการ</th><th></th>${ALL.map(m=>`<th class="${sc(m).trim()}">${TH[m]}${acts(m)?'':'<i class="tg">แผน</i>'}</th>`).join('')}${sumHead}</tr></thead><tbody>`;
+    R.forEach(r=>{ if(r.h){h+=`<tr class="gh"><td class="l stk">${r.h}</td><td colspan="${nc}"></td></tr>`;return;}
+      const yp=r.yN?r.yP:null, c=cl(r,yp,r.yA), tc=r.kind==='tot'?' tot':'';
+      h+=`<tr class="rp${tc}"><td class="l stk" rowspan="3">${lab(r)}</td><td class="kd">แผน</td>${ALL.map(m=>`<td class="pa num${sc(m)}">${fv(r.cells[m].pa,r)}</td>`).join('')}<td class="p0 s num pa">${fv(yp,r)}</td><td class="s"></td><td class="s"></td><td class="s"></td><td class="p0 s num pa">${r.pct?'':fv(r.fy,r)}</td></tr>`;
+      h+=`<tr class="rp${tc}"><td class="kd">จริง</td>${ALL.map(m=>{const x=r.cells[m];return `<td class="num${sc(m)} ${acts(m)?cl(r,x.pa,x.ac):'fut'}">${acts(m)?fv(x.ac,r):'·'}</td>`}).join('')}<td class="p0 s"></td><td class="s num ${c}">${fv(r.yA,r)}</td><td class="s"></td><td class="s num ${c}">${pc(r)}</td><td class="p0 s"></td></tr>`;
+      h+=`<tr class="rd${tc}"><td class="kd">ต่าง</td>${ALL.map(m=>{const x=r.cells[m],d=(x.pa===null||x.pa===undefined||x.ac===null||x.ac===undefined)?null:x.ac-x.pa;return `<td class="num${sc(m)} ${acts(m)?cl(r,x.pa,x.ac):'fut'}">${acts(m)?fd(d,r):'·'}</td>`}).join('')}<td class="p0 s"></td><td class="s"></td><td class="s num ${c}">${r.yN?fd(r.yA-r.yP,r):'–'}</td><td class="s"></td><td class="p0 s"></td></tr>`; });
+  }
+  if(multi) h+=`<tr class="cnt"><td class="l stk">จำนวนสาขาที่มีแผน</td>${st.lay==='row'?'<td></td>':''}${ALL.map(m=>`<td class="${st.lay==='pair'?'p0 ':''}pa c"${st.lay==='pair'?' colspan="2"':''}>${E.n[m]}/${E.nAll}</td>`).join('')}<td class="p0 s" colspan="5"></td></tr>`;
+  return h+'</tbody>';
+}
+
+/* ---------- ภาพรวมทุกสาขา ---------- */
+function brStat(code){ const b=D.br[code], u=st.ug; st.ug='all'; const E=single(b); st.ug=u; if(!E) return null; NA=E.na;
+  const ms=months(E), last=[...ms].pop();
+  const oA=sumM(E,ms,m=>op(E,m,'v')), oP=sumM(E,ms,m=>op(E,m,'p'));
+  const lA=last!==undefined?op(E,last,'v'):null, lP=last!==undefined?op(E,last,'p'):null;
+  let a=0,p=0,sa=0,sp=0; ms.forEach(m=>{if(!E.ps[m]) return; a+=op(E,m,'v'); p+=op(E,m,'p'); sa+=E.s[m]||0; sp+=E.ps[m];});
+  let run=0; for(let i=ms.length-1;i>=0;i--){ const m=ms[i]; if(op(E,m,'v')>op(E,m,'p')+0.5) run++; else break; }
+  return {code,n:b.n,rg:b.rg,b,nM:ms.length,last,oA,oP,dp:oA-oP,pp:oP?oA/oP-1:null,lA,lP,lpp:lP?lA/lP-1:null,rA:sa?a/sa:null,rP:sp?p/sp:null,sp:sp?sa/sp-1:null,run};
+}
+function renderOverview(){
+  const S=Object.keys(D.br).map(brStat).filter(Boolean);
+  const rgs=[...new Set(S.map(x=>x.b.rg))].sort((a,b)=>a.localeCompare(b,'th'));
+  const o=st.ov, q=o.q.trim().toLowerCase();
+  let L=S.filter(x=>(!o.rg||x.b.rg===o.rg)&&(!o.t||(o.t==='Shop'?x.b.t==='Shop':x.b.t!=='Shop'))&&(!q||x.b.n.toLowerCase().includes(q)||x.code.includes(q))&&(!o.over||x.dp>0.5));
+  const key=o.sort; L.sort((a,b)=>{const A=a[key],B=b[key]; if(typeof A==='string') return A.localeCompare(B,'th')*o.dir; return ((A??-1e18)-(B??-1e18))*o.dir;});
+  const tot=L.reduce((a,x)=>({oA:a.oA+x.oA,oP:a.oP+x.oP}),{oA:0,oP:0}), OV=L.filter(x=>x.dp>0.5), n2=L.filter(x=>x.run>=2).length;
+  const th=(k,l,cl='')=>`<th class="sort ${cl}" data-s="${k}">${l}${o.sort===k?(o.dir>0?' ▲':' ▼'):''}</th>`;
+  const dim=(c,icn,lab,v,sub,vc='')=>`<div class="dim" style="--c:${c}"><div class="h">${ic(icn)} ${lab}</div><div class="v num ${vc}">${v}</div><div class="m">${sub}</div></div>`;
+  let h=`<div class="bar"><select class="sel" id="oRg"><option value="">ทุกภาค</option>${rgs.map(r=>`<option ${r===o.rg?'selected':''}>${esc(r)}</option>`).join('')}</select>
+    ${segH('oT',[['','DC + Shop'],['DC','DC'],['Shop','Shop']],o.t,'sm')}
+    <input type="search" class="sel" id="oQ" placeholder="ค้นหาสาขา / รหัส" value="${esc(o.q)}">
+    <label class="chk"><input type="checkbox" id="oOv" ${o.over?'checked':''}> เฉพาะเกินแผน</label>
+    <span class="sp"></span><span class="lb">${ic('cal',14)} ข้อมูลจริงถึง ${esc(D.asof)}</span></div>
+  <div class="g4">
+    ${dim('#1F3A5F','wallet','ค่าใช้จ่ายดำเนินงาน สะสม',fB(tot.oA),`แผน ${fB(tot.oP)} ${chipPct(tot.oP?tot.oA/tot.oP-1:null)}`,tone(tot.oA,tot.oP))}
+    ${dim('#C0392B','up','สาขาที่สะสมเกินแผน',`${OV.length}<small> / ${L.length} สาขา</small>`,`ส่วนเกินรวม +${nf.format(Math.round(OV.reduce((a,x)=>a+x.dp,0)))} บาท`,'dn')}
+    ${dim('#D97706','repeat','เกินแผน 2 เดือนติดขึ้นไป',`${n2}<small> สาขา</small>`,'ต้องส่งแผนแก้ไขภายใน 7 วัน','dn')}
+    ${dim('#1E8A5A','check','สาขาที่อยู่ในแผน',`${L.length-OV.length}<small> สาขา</small>`,'สะสมไม่เกินแผน (เดือนที่มีแผน)','up')}
+  </div>
+  <div class="card"><h3>${ic('table')} ทุกสาขา <span class="q">คลิกแถวเพื่อดูรายละเอียด · ค่าใช้จ่ายดำเนินงาน ไม่รวมเงินเดือน / ต้นทุนเข้ารับ · เทียบเฉพาะเดือนที่มีแผน</span><span class="sp"></span><button class="btn" id="oCsv">${ic('dl',15)} CSV</button></h3>
+  <div class="tw"><table class="t ov"><thead><tr>${th('code','รหัส','l')}${th('n','สาขา','l stk')}${th('rg','ภาค','l')}
+    ${th('oA','จริง สะสม','p0')}${th('oP','แผน สะสม')}${th('dp','ต่าง')}${th('pp','%')}${th('lpp','เดือนล่าสุด','p0')}${th('run','เกินติดกัน')}${th('rA','% ค่าใช้จ่าย/ยอดขาย','p0')}${th('rP','แผน %')}${th('sp','ยอดขาย vs แผน','p0')}</tr></thead><tbody>`;
+  L.forEach(x=>{ const c=x.dp>0.5?'dn':'up';
+    h+=`<tr class="go" data-br="${x.code}"><td class="l q num">${x.code}</td><td class="l stk"><b>${esc(x.b.n)}</b>${x.b.t==='Shop'?' <span class="chip c-na sm">Shop</span>':''}</td><td class="l q">${esc(x.b.rg)}</td>
+      <td class="p0 num">${fB(x.oA)}</td><td class="num pa">${fB(x.oP)}</td><td class="num ${c}">${fD(x.dp)}</td><td class="num">${chipPct(x.pp)}</td>
+      <td class="p0 num ${x.lpp>0.0005?'dn':'up'}">${x.last!==undefined?TH[x.last]+' '+fP(x.lpp):'–'}</td><td>${x.run>=2?`<span class="chip c-bad sm">${x.run} เดือน</span>`:x.run===1?'<span class="chip c-warn sm">1 เดือน</span>':''}</td>
+      <td class="p0 num ${x.rA!==null&&x.rP!==null&&x.rA>x.rP?'dn':'up'}">${fR(x.rA)}</td><td class="num pa">${fR(x.rP)}</td><td class="p0 num ${x.sp<-0.0005?'dn':'up'}">${fP(x.sp)}</td></tr>`; });
+  h+=`</tbody></table></div><div class="note">สะสม = รวมเฉพาะเดือนที่สาขานั้นมีแผน (ถึง ${TH[NACT-1]}) · % ค่าใช้จ่าย/ยอดขาย = ค่าใช้จ่ายดำเนินงาน ÷ ยอดขาย · เกินติดกัน = จำนวนเดือนล่าสุดที่ค่าใช้จ่ายดำเนินงานเกินแผนต่อเนื่อง</div></div>`;
+  $('app').innerHTML=h;
+  $('oRg').onchange=e=>{o.rg=e.target.value;renderOverview()};
+  $('oT').onclick=e=>{const t=e.target.closest('[data-k]'); if(t){o.t=t.dataset.k;renderOverview()}};
+  $('oQ').oninput=e=>{o.q=e.target.value;const p=e.target.selectionStart;renderOverview();const i=$('oQ');i.focus();i.setSelectionRange(p,p)};
+  $('oOv').onchange=e=>{o.over=e.target.checked;renderOverview()};
+  document.querySelectorAll('th.sort').forEach(t=>t.onclick=()=>{const k=t.dataset.s; if(o.sort===k)o.dir*=-1; else{o.sort=k;o.dir=['code','n','rg'].includes(k)?1:-1;} renderOverview();});
+  document.querySelectorAll('tr.go').forEach(t=>t.onclick=()=>{st.br=t.dataset.br;render();scrollTo(0,0);});
+  $('oCsv').onclick=()=>{ const q=x=>'"'+String(x).replace(/"/g,'""')+'"';
+    const rows=[['รหัส','สาขา','ประเภท','ภาค','จริง สะสม','แผน สะสม','ต่าง','%','เดือนล่าสุด %','เกินติดกัน (เดือน)','% ค่าใช้จ่าย/ยอดขาย','แผน %','ยอดขาย vs แผน %'].map(q).join(',')];
+    L.forEach(x=>rows.push([x.code,q(x.b.n),x.b.t,q(x.b.rg),Math.round(x.oA),Math.round(x.oP),Math.round(x.dp),x.pp===null?'':(x.pp*100).toFixed(1),x.lpp===null?'':(x.lpp*100).toFixed(1),x.run,x.rA===null?'':(x.rA*100).toFixed(1),x.rP===null?'':(x.rP*100).toFixed(1),x.sp===null?'':(x.sp*100).toFixed(1)].join(',')));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'})); a.download=`ต้นทุนทุกสาขา_${D.asof}.csv`; document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500); };
+}
+
+</script>
+</body>
+</html>
